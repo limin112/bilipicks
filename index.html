@@ -447,29 +447,51 @@ function loadCoverCache() {
 function saveCoverCache(map) {
   try { localStorage.setItem(COVER_CACHE_KEY, JSON.stringify(map)); } catch {}
 }
-async function fetchCoverUrl(bvid) {
-  const endpoints = [
-    `https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid='+bvid)}`,
-  ];
-  for (const url of endpoints) {
-    try {
-      const r = await fetch(url, { credentials: 'omit' });
-      if (!r.ok) continue;
-      const j = await r.json();
-      let pic = j && j.data && j.data.pic;
-      if (!pic && j && j.contents) {
-        const inner = JSON.parse(j.contents);
-        pic = inner && inner.data && inner.data.pic;
-      }
-      if (!pic) continue;
-      if (pic.startsWith('//')) pic = 'https:' + pic;
-      if (pic.startsWith('http://')) pic = 'https://' + pic.slice(7);
-      return pic;
-    } catch {}
-  }
-  return null;
+// api.bilibili.com sends no CORS headers, so fetch() from this origin is
+// blocked, and server-side proxies (Cloudflare Workers included) get
+// "-412 request was banned". The view API does support JSONP, which a
+// <script> tag can load from the visitor's own browser.
+let jsonpSeq = 0;
+function jsonp(url, timeoutMs = 8000) {
+  return new Promise((resolve, reject) => {
+    const cb = `__bilipicksCover${++jsonpSeq}`;
+    const script = document.createElement('script');
+    const timer = setTimeout(() => finish(new Error('timeout')), timeoutMs);
+    function finish(err, data) {
+      clearTimeout(timer);
+      window[cb] = () => {}; // a late response must not hit an undefined callback
+      script.remove();
+      err ? reject(err) : resolve(data);
+    }
+    window[cb] = data => finish(null, data);
+    script.onerror = () => finish(new Error('script load failed'));
+    script.src = `${url}&jsonp=jsonp&callback=${cb}`;
+    document.head.appendChild(script);
+  });
 }
+async function fetchCoverUrl(bvid) {
+  try {
+    const j = await jsonp(`https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`);
+    let pic = j && j.code === 0 && j.data && j.data.pic;
+    if (!pic) return null;
+    if (pic.startsWith('//')) pic = 'https:' + pic;
+    if (pic.startsWith('http://')) pic = 'https://' + pic.slice(7);
+    const u = new URL(pic);
+    if (!/(^|\.)(hdslb|biliimg)\.com$/.test(u.hostname)) return null;
+    // The CDN resizes on the fly: a 1080p cover drops from ~120KB to ~20KB.
+    return u.origin + u.pathname + '@672w_378h_1c.webp';
+  } catch {
+    return null;
+  }
+}
+// "error" doesn't bubble, so listen in the capture phase on the persistent #grid.
+// If a cover image fails, drop it and fall back to the gradient placeholder.
+$('#grid').addEventListener('error', e => {
+  const img = e.target;
+  if (!(img.matches && img.matches('img.cover'))) return;
+  img.parentNode.classList.remove('has-cover');
+  img.remove();
+}, true);
 async function hydrateCovers() {
   const cache = loadCoverCache();
   let changed = false;
