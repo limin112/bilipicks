@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="BiliPicks — Min 手选的小学生向 B 站视频播放页，无推荐算法。">
+<title>BiliPicks · Min's B站精选播放器</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  color-scheme:dark;
+  --bg:#0b0b0f; --bg2:#14141a; --bg3:#1e1e26; --bg4:#2a2a35;
+  --fg:#f3f3f7; --muted:#9a9aa8; --accent:#00a1d6; --pink:#fb7299;
+  --card:#17171e; --shadow:0 12px 40px rgba(0,0,0,.45);
+  --radius:14px; --header:56px;
+}
+:root.light{
+  color-scheme:light;
+  --bg:#f5f6fa; --bg2:#fff; --bg3:#eef0f5; --bg4:#d9dde8;
+  --fg:#12121a; --muted:#5c5c6e; --accent:#00a1d6; --pink:#fb7299;
+  --card:#fff; --shadow:0 10px 30px rgba(20,20,40,.08);
+}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC",Arial,sans-serif;
+  overflow:hidden;
+}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:transparent}
+.app{display:grid;grid-template-rows:var(--header) 1fr;height:100%}
+header{
+  display:flex;align-items:center;gap:12px;padding:0 16px;
+  background:rgba(11,11,15,.88); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bg3); z-index:30;
+}
+:root.light header{background:rgba(255,255,255,.9)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:750;font-size:18px;letter-spacing:-.3px;white-space:nowrap}
+.mark{
+  width:28px;height:20px;border-radius:6px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--pink)); color:#fff; font-size:11px;font-weight:800;
+}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav button{
+  padding:8px 12px;border-radius:999px;color:var(--muted);font-weight:600;
+}
+.nav button.on,.nav button:hover{background:var(--bg3);color:var(--fg)}
+.search{flex:1;max-width:520px;margin:0 auto}
+.search input{
+  width:100%;height:38px;border-radius:999px;border:1px solid var(--bg4);
+  background:var(--bg2);padding:0 16px;outline:none;
+}
+.search input:focus{border-color:var(--accent)}
+.tools{display:flex;gap:8px;align-items:center}
+.pill{
+  height:34px;padding:0 12px;border-radius:999px;background:var(--bg3);
+  display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--fg);
+}
+.pill.primary{background:var(--accent);color:#fff}
+.pill.pink{background:var(--pink);color:#fff}
+.stage{position:relative;min-height:0}
+.view{position:absolute;inset:0;overflow:auto;padding:18px 22px 40px}
+.hidden{display:none!important}
+
+.hero{
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:18px;margin-bottom:18px;
+}
+@media(max-width:980px){.hero{grid-template-columns:1fr}}
+.player-shell{
+  background:#000;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);
+  aspect-ratio:16/9;position:relative;
+}
+.player-shell iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.player-empty{
+  position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);
+  background:radial-gradient(circle at 30% 20%,#1b2a40, #09090d 70%);
+  text-align:center;padding:24px;
+}
+.now{
+  background:var(--card);border:1px solid var(--bg3);border-radius:var(--radius);padding:16px 18px;
+  box-shadow:var(--shadow);
+}
+.now h1{margin:0 0 8px;font-size:20px;line-height:1.35;letter-spacing:-.2px}
+.now .meta{color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:10px}
+.now .caution{font-size:13px;color:var(--pink);margin:8px 0 0}
+.now .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.queue{
+  margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto;
+}
+.queue button{
+  text-align:left;padding:10px 12px;border-radius:10px;background:var(--bg3);
+  display:grid;gap:2px;
+}
+.queue button.on{outline:2px solid var(--accent)}
+.queue .t{font-weight:650;line-height:1.35}
+.queue .s{color:var(--muted);font-size:12px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.chip{padding:7px 12px;border-radius:999px;background:var(--bg3);font-weight:600;color:var(--muted)}
+.chip.on{background:var(--fg);color:var(--bg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{
+  background:var(--card);border:1px solid var(--bg3);border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;text-align:left;cursor:pointer;
+  transition:transform .15s ease, border-color .15s ease;
+}
+.card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.thumb{
+  aspect-ratio:16/9;background:
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 35%, #111), #15151c 70%);
+  position:relative;display:grid;place-items:center;
+}
+.thumb .bv{font-size:12px;opacity:.7;letter-spacing:.4px}
+.thumb .play{
+  width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.45);
+  display:grid;place-items:center;color:#fff;font-size:18px;backdrop-filter:blur(4px)
+}
+.thumb .tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:3px 8px;border-radius:6px}
+.thumb .age{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:3px 7px;border-radius:6px}
+.card .body{padding:12px 14px 14px}
+.card h3{margin:0 0 6px;font-size:15px;line-height:1.4;font-weight:700}
+.card .sub{color:var(--muted);font-size:12px}
+
+.about{max-width:760px}
+.about h1{font-size:28px;margin:8px 0 12px;letter-spacing:-.4px}
+.about h2{font-size:18px;margin:28px 0 10px}
+.about p,.about li{color:var(--muted);line-height:1.8}
+.about strong{color:var(--fg);font-weight:600}
+.about ul{padding-left:1.2em}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.kpi{background:var(--card);border:1px solid var(--bg3);border-radius:12px;padding:14px}
+.kpi b{display:block;font-size:22px;color:var(--fg)}
+.kpi span{color:var(--muted);font-size:12px}
+
+/* TV mode */
+body.tv{overflow:hidden}
+body.tv .app{display:none!important}
+#tv-layer{position:fixed;inset:0;z-index:100;display:none}
+body.tv #tv-layer{display:grid!important}
+.tv-wrap{height:100%;display:grid;grid-template-rows:1fr auto;background:#000}
+.tv-player{position:relative;min-height:0}
+.tv-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tv-bar{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));
+  color:#fff;
+}
+.tv-bar h2{margin:0;font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-hint{color:#bbb;font-size:12px;white-space:nowrap}
+.empty{padding:40px 8px;color:var(--muted)}
+@media(max-width:720px){
+  .nav{display:none}
+  .view{padding:14px}
+  .kpis{grid-template-columns:1fr}
+  .tv-hint{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <a class="logo" href="#" id="logo"><span class="mark">B</span>BiliPicks</a>
+    <nav class="nav" aria-label="主导航">
+      <button type="button" data-view="home" class="on">首页</button>
+      <button type="button" data-view="watch">播放</button>
+      <button type="button" data-view="about">About</button>
+    </nav>
+    <div class="search"><input id="search" type="search" placeholder="搜索视频 / UP / 分类…" aria-label="搜索"></div>
+    <div class="tools">
+      <button type="button" class="pill" id="btn-theme" aria-label="切换深浅色">深色</button>
+      <button type="button" class="pill pink" id="btn-tv" aria-label="进入 TV 模式">TV 模式</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <section class="view" id="view-home">
+      <div class="chips" id="chips"></div>
+      <p class="sub" id="result" style="color:var(--muted);margin:0 0 12px"></p>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="view hidden" id="view-watch">
+      <div class="hero">
+        <div>
+          <div class="player-shell">
+            <div class="player-empty" id="player-empty">选一条视频开始看</div>
+            <iframe id="main-player" title="Bilibili player" allow="fullscreen; encrypted-media" allowfullscreen hidden referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+        <aside class="now">
+          <h1 id="now-title">选择一条视频</h1>
+          <div class="meta" id="now-meta"></div>
+          <p class="caution" id="now-caution" hidden></p>
+          <div class="actions">
+            <button type="button" class="pill" id="btn-prev">上一条 · K</button>
+            <button type="button" class="pill primary" id="btn-next">下一条 · J</button>
+            <a class="pill" id="open-bili" target="_blank" rel="noopener noreferrer">在 B 站打开</a>
+            <a class="pill" id="open-channel" target="_blank" rel="noopener noreferrer">UP 主页</a>
+            <button type="button" class="pill pink" onclick="document.getElementById('btn-tv').click()">TV 模式</button>
+          </div>
+          <div class="queue" id="queue" aria-label="播放队列"></div>
+        </aside>
+      </div>
+      <div class="chips" id="chips-watch-note" style="display:none"></div>
+      <p style="color:var(--muted);font-size:12px;margin-top:8px">提示：嵌入播放器由 B 站提供；若空白，多半是本地 file:// 被拦截，用下方本地服务打开即可。弹幕默认关闭。</p>
+    </section>
+
+    <section class="view hidden about" id="view-about">
+      <div class="eyebrow" style="color:var(--muted);letter-spacing:1px;font-size:12px">ABOUT</div>
+      <h1>为什么做 BiliPicks</h1>
+      <p>算法推荐很容易把孩子（和大人）带偏。这份清单是<strong>实践哥 Li（@MinLiBuilds）</strong>手选的小学生向 B 站入口：自然、科学、历史、数学、动手创造，外加少量国创动漫。目标不是“无限刷”，而是<strong>点开就看、看完就停</strong>。</p>
+      <div class="kpis" id="about-kpis"></div>
+      <h2>这个播放器有什么</h2>
+      <ul>
+        <li><strong>B 站风格浏览 + 内嵌官方播放器</strong>：只播清单里的视频，没有热度流。</li>
+        <li><strong>深色 / 浅色</strong>：右上角切换，快捷键 <strong>D</strong>。</li>
+        <li><strong>TV 模式</strong>：大屏懒看，藏掉导航；快捷键 <strong>T</strong> 进入，<strong>Esc</strong> 退出；左右键 / J K 切集。</li>
+        <li><strong>About</strong>：说明策展原则、家长提示与排除项。</li>
+      </ul>
+      <h2>使用前请知道</h2>
+      <p>这不是逐片审过的儿童白名单。频道与代表作来自 2026-11-08 整理；年龄是编辑建议，不是官方分级。商单、猎奇标题、实验危险画面仍需家长挑选。打开 B 站端仍可能出现推荐，建议关掉自动连播。</p>
+      <h2>没放进来的</h2>
+      <p>低龄营销向动画、法律/职场/战争黑色幽默、地缘政治、志怪恐怖（含名字像儿童故事的）、纯数码评测、来源不明的同名杂号，本轮都不收。</p>
+      <h2>灵感</h2>
+      <p>目录思路参考 <a href="https://karpathy.ai/tristan-tube/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">TristanTube</a>：人来挑，不靠推荐。本站不是 B 站官方产品。</p>
+      <p style="margin-top:24px">策展：<a href="https://x.com/MinLiBuilds" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">实践哥 Li · @MinLiBuilds</a> · 2026-11-08（Asia/Singapore）</p>
+    </section>
+
+    </div>
+</div>
+
+<div class="tv-wrap hidden" id="tv-layer">
+      <div class="tv-player"><iframe id="tv-player" title="TV player" allow="fullscreen; encrypted-media" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <div class="tv-bar">
+        <button type="button" class="pill" id="tv-prev">← 上一条</button>
+        <h2 id="tv-title">TV</h2>
+        <span class="tv-hint">T 开关 · Esc 退出 · ← → / J K 切集 · D 深浅色</span>
+        <button type="button" class="pill" id="tv-next">下一条 →</button>
+        <button type="button" class="pill pink" id="btn-exit-tv">退出 TV</button>
+      </div>
+    </div>
+  
+<script>
+
+const DATA = {"videos": [{"id": "BV18wxY63Erp", "title": "网络热传生物鉴定 第65期", "url": "https://www.bilibili.com/video/BV18wxY63Erp", "channel": "无穷小亮的科普日常", "channelUrl": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨"}, {"id": "BV17wn96PERn", "title": "亮记闲谈-如果恐龙活着它的肉是什么味？", "url": "https://www.bilibili.com/video/BV17wn96PERn", "channel": "无穷小亮的科普日常", "channelUrl": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨"}, {"id": "BV1Nk346UE6G", "title": "国家自然博物馆里的霸王龙真不简单！", "url": "https://www.bilibili.com/video/BV1Nk346UE6G", "channel": "国家自然博物馆", "channelUrl": "https://space.bilibili.com/1313466763", "category": "自然动物", "minAge": 8, "caution": "更新慢、粉丝少", "reason": "官方馆，恐龙、标本讲解，短小干净"}, {"id": "BV1YGEE6XEMx", "title": "国家自然博物馆里的“匹诺曹”恐龙", "url": "https://www.bilibili.com/video/BV1YGEE6XEMx", "channel": "国家自然博物馆", "channelUrl": "https://space.bilibili.com/1313466763", "category": "自然动物", "minAge": 8, "caution": "更新慢、粉丝少", "reason": "官方馆，恐龙、标本讲解，短小干净"}, {"id": "BV1qfxB6qEjD", "title": "【鬼谷闲谈】沧龙：问君能有几多愁，恰似鳞龙入海流", "url": "https://www.bilibili.com/video/BV1qfxB6qEjD", "channel": "芳斯塔芙", "channelUrl": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣"}, {"id": "BV1aMpu6MEdc", "title": "【科学史】那些年，科学家用光遗传做的鬼畜实验……", "url": "https://www.bilibili.com/video/BV1aMpu6MEdc", "channel": "芳斯塔芙", "channelUrl": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣"}, {"id": "BV1di4u6XEKc", "title": "【我是不白吃】1102 长得丑吃着香，危险的海中美味“海鳝”", "url": "https://www.bilibili.com/video/BV1di4u6XEKc", "channel": "我是不白吃", "channelUrl": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看"}, {"id": "BV1Za4u6xE46", "title": "【我是不白吃】1101 没有这种小虫子，十三香可能要变十二香了！", "url": "https://www.bilibili.com/video/BV1Za4u6xE46", "channel": "我是不白吃", "channelUrl": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看"}, {"id": "BV1XQ4P6MEEx", "title": "焚风中的昆虫，竟能享受甜品夜市？", "url": "https://www.bilibili.com/video/BV1XQ4P6MEEx", "channel": "中国国家地理", "channelUrl": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像"}, {"id": "BV17Px16tESS", "title": "这条分界线，正在制造中国最年轻的陆地", "url": "https://www.bilibili.com/video/BV17Px16tESS", "channel": "中国国家地理", "channelUrl": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像"}, {"id": "BV1DhxK6iEgj", "title": "或许无法取胜，但我们绝不认输。", "url": "https://www.bilibili.com/video/BV1DhxK6iEgj", "channel": "星球研究所", "channelUrl": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理"}, {"id": "BV1ABWc6zEBk", "title": "“比死亡先来的，是搜救犬的鼻筒子。”", "url": "https://www.bilibili.com/video/BV1ABWc6zEBk", "channel": "星球研究所", "channelUrl": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理"}, {"id": "BV1p75Q6XEVo", "title": "大作坊年年下猛料——连齐天大圣都“搓”出来了？！", "url": "https://www.bilibili.com/video/BV1p75Q6XEVo", "channel": "国家天文台", "channelUrl": "https://space.bilibili.com/592311716", "category": "地理天文", "minAge": 8, "caution": "更新频率一般", "reason": "中科院国家天文台官方，天文一手科普"}, {"id": "BV1jfE7zrEm9", "title": "大作坊下料也挺狠——请用耳朵打开这条视频", "url": "https://www.bilibili.com/video/BV1jfE7zrEm9", "channel": "国家天文台", "channelUrl": "https://space.bilibili.com/592311716", "category": "地理天文", "minAge": 8, "caution": "更新频率一般", "reason": "中科院国家天文台官方，天文一手科普"}, {"id": "BV1BA4662EfB", "title": "蚊子嘴竟是目前最精密的3D打印针头？！", "url": "https://www.bilibili.com/video/BV1BA4662EfB", "channel": "二次元的中科院物理所", "channelUrl": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿"}, {"id": "BV1jN4B6BENJ", "title": "中国科学家打破人类低温纪录：在空间站制备最冷物质", "url": "https://www.bilibili.com/video/BV1jN4B6BENJ", "channel": "二次元的中科院物理所", "channelUrl": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿"}, {"id": "BV1Xzxv6XESu", "title": "人推墙没推动，人对墙做功吗？", "url": "https://www.bilibili.com/video/BV1Xzxv6XESu", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚"}, {"id": "BV1GYso65EgU", "title": "近视眼和老花眼能相互抵消吗？", "url": "https://www.bilibili.com/video/BV1GYso65EgU", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚"}, {"id": "BV1fXxK6HEUY", "title": "诺奖百人科普接力|第1棒：你知道X射线的故事吗？你知道第一届诺贝尔物理学奖的颁给了谁吗？3分钟带你走进1895年的那个夜晚...", "url": "https://www.bilibili.com/video/BV1fXxK6HEUY", "channel": "不刷题的吴姥姥", "channelUrl": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验"}, {"id": "BV15NnJ6PEKM", "title": "在玻璃栈道上跳广场舞？！命都不要了？共振现象很可能造成“桥毁人亡”！", "url": "https://www.bilibili.com/video/BV15NnJ6PEKM", "channel": "不刷题的吴姥姥", "channelUrl": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验"}, {"id": "BV1L94M6pEnN", "title": "同样都滴水！空调和一级能效热水器的冷凝水，差别究竟在哪？", "url": "https://www.bilibili.com/video/BV1L94M6pEnN", "channel": "科学火箭叔", "channelUrl": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手"}, {"id": "BV1NCso6qExc", "title": "一档节目，8支团队，这期讲的全是你家客厅里的东西", "url": "https://www.bilibili.com/video/BV1NCso6qExc", "channel": "科学火箭叔", "channelUrl": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手"}, {"id": "BV1Q84v6XEQk", "title": "香蕉也能操作手机？我们在科技馆做了个实验", "url": "https://www.bilibili.com/video/BV1Q84v6XEQk", "channel": "中国科学技术馆", "channelUrl": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频"}, {"id": "BV1mpxX6tExK", "title": "揭秘天宫实验柜：为什么太空能合成地球造不出的材料？", "url": "https://www.bilibili.com/video/BV1mpxX6tExK", "channel": "中国科学技术馆", "channelUrl": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频"}, {"id": "BV1Hwp46KEC5", "title": "2026诺贝尔化学奖解读：分清左手右手竟能获诺奖？！", "url": "https://www.bilibili.com/video/BV1Hwp46KEC5", "channel": "上海科技馆官方账号", "channelUrl": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览"}, {"id": "BV1a3YE6WE7F", "title": "当身体被大脑欺骗，揭秘VR大空间创作全流程！", "url": "https://www.bilibili.com/video/BV1a3YE6WE7F", "channel": "上海科技馆官方账号", "channelUrl": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览"}, {"id": "BV1cpJ86BEys", "title": "【毕导】不做诺奖科普的第一年，科普博主我还会做多久？", "url": "https://www.bilibili.com/video/BV1cpJ86BEys", "channel": "毕导", "channelUrl": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大"}, {"id": "BV1VVhk6pEiR", "title": "【毕导】这个X你肯定见过，但它其实根本不存在", "url": "https://www.bilibili.com/video/BV1VVhk6pEiR", "channel": "毕导", "channelUrl": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大"}, {"id": "BV1Ht4e6KEG8", "title": "脚趾抽筋，怎么快速缓解？", "url": "https://www.bilibili.com/video/BV1Ht4e6KEG8", "channel": "科普中国", "channelUrl": "https://space.bilibili.com/92601724", "category": "科学实验", "minAge": 8, "caution": "偏成人健康话题，家长挑", "reason": "中国科协官方，健康与生活科学"}, {"id": "BV1ct4e6TECT", "title": "小时候的“屁股针”为什么消失了？", "url": "https://www.bilibili.com/video/BV1ct4e6TECT", "channel": "科普中国", "channelUrl": "https://space.bilibili.com/92601724", "category": "科学实验", "minAge": 8, "caution": "偏成人健康话题，家长挑", "reason": "中国科协官方，健康与生活科学"}, {"id": "BV12pnJ6DExY", "title": "可控核聚变，还要等50年吗？中国“人造太阳”走到哪了", "url": "https://www.bilibili.com/video/BV12pnJ6DExY", "channel": "妈咪说MommyTalk", "channelUrl": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解"}, {"id": "BV1XzHk6wEdw", "title": "如何在冰里探测“幽灵粒子”？2026年物理学诺奖解读", "url": "https://www.bilibili.com/video/BV1XzHk6wEdw", "channel": "妈咪说MommyTalk", "channelUrl": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解"}, {"id": "BV1HBnH6JEAZ", "title": "【官方双语】投身数学，从未有过比现在更好的时候", "url": "https://www.bilibili.com/video/BV1HBnH6JEAZ", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 11, "caution": "偏难，适合拔尖孩子", "reason": "官方中文版，动画讲数学之美"}, {"id": "BV1znaf61EnS", "title": "【官方双语】AI 未能解决的最后一道IMO真题", "url": "https://www.bilibili.com/video/BV1znaf61EnS", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 11, "caution": "偏难，适合拔尖孩子", "reason": "官方中文版，动画讲数学之美"}, {"id": "BV1nb4e6vEPK", "title": "精品文物簿｜独具匠心的四羊方尊", "url": "https://www.bilibili.com/video/BV1nb4e6vEPK", "channel": "国家博物馆", "channelUrl": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片"}, {"id": "BV1thxP6ZEWp", "title": "精品文物簿｜玉人：窥见殷商面容", "url": "https://www.bilibili.com/video/BV1thxP6ZEWp", "channel": "国家博物馆", "channelUrl": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片"}, {"id": "BV1G14e69Eu5", "title": "邀您赏11月6日每日故宫精品文物", "url": "https://www.bilibili.com/video/BV1G14e69Eu5", "channel": "故宫博物院", "channelUrl": "https://space.bilibili.com/630399926", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "故宫官方，每日文物与宫廷四季"}, {"id": "BV1ni4B6jECz", "title": "故宫秋深，银杏鎏金；风过宫墙，碎金铺地。银杏与秋光相映，游人与宫墙交织，尽显故宫秋韵。", "url": "https://www.bilibili.com/video/BV1ni4B6jECz", "channel": "故宫博物院", "channelUrl": "https://space.bilibili.com/630399926", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "故宫官方，每日文物与宫廷四季"}, {"id": "BV1nc4J6tEqv", "title": "古代数学里的高考原题", "url": "https://www.bilibili.com/video/BV1nc4J6tEqv", "channel": "央视纪录", "channelUrl": "https://space.bilibili.com/72209046", "category": "历史文博", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等"}, {"id": "BV1A34z6pERE", "title": "56乘78古人竟然能用竹棍算出来！", "url": "https://www.bilibili.com/video/BV1A34z6pERE", "channel": "央视纪录", "channelUrl": "https://space.bilibili.com/72209046", "category": "历史文博", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等"}, {"id": "BV1XFx56fE3M", "title": "错金银云纹犀牛尊，195件国宝番外篇", "url": "https://www.bilibili.com/video/BV1XFx56fE3M", "channel": "讲解员河森堡", "channelUrl": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史"}, {"id": "BV1ncn26DENc", "title": "中国版图被改小？造谣！肘击伪史论第10期", "url": "https://www.bilibili.com/video/BV1ncn26DENc", "channel": "讲解员河森堡", "channelUrl": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史"}, {"id": "BV11VMq6qEFA", "title": "「灵犀X2」会说话你就多说点！", "url": "https://www.bilibili.com/video/BV11VMq6qEFA", "channel": "稚晖君", "channelUrl": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深", "reason": "硬核机器人DIY，激发工程梦"}, {"id": "BV1SAcjzEEfC", "title": "绝世高手，马上下山！", "url": "https://www.bilibili.com/video/BV1SAcjzEEfC", "channel": "稚晖君", "channelUrl": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深", "reason": "硬核机器人DIY，激发工程梦"}, {"id": "BV1dinB69EEF", "title": "和@小狮日记 一起在AI现场暴走，遇到了很多有趣的制作，10月23日我也会和小狮一起在直播现场选择喜欢的队伍，京东搜索【Aidol创造营】预约直播，10月23…", "url": "https://www.bilibili.com/video/BV1dinB69EEF", "channel": "手工耿", "channelUrl": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手"}, {"id": "BV1Ljtt6VEAS", "title": "弄了口大钢牙", "url": "https://www.bilibili.com/video/BV1Ljtt6VEAS", "channel": "手工耿", "channelUrl": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手"}, {"id": "BV1Dt421h71s", "title": "Kitten N 摄像头积木盒 功能介绍", "url": "https://www.bilibili.com/video/BV1Dt421h71s", "channel": "编程猫", "channelUrl": "https://space.bilibili.com/205900972", "category": "动手创造", "minAge": 8, "caution": "以产品介绍为主，商业属性", "reason": "少儿图形化编程官方，教程向"}, {"id": "BV14U421d7jp", "title": "Kitten N AI绘画功能介绍", "url": "https://www.bilibili.com/video/BV14U421d7jp", "channel": "编程猫", "channelUrl": "https://space.bilibili.com/205900972", "category": "动手创造", "minAge": 8, "caution": "以产品介绍为主，商业属性", "reason": "少儿图形化编程官方，教程向"}, {"id": "BV1WtpxeFEii", "title": "【生日贴】今天我四岁了，感谢粉丝们！也祝福各位老师，教师节快乐！", "url": "https://www.bilibili.com/video/BV1WtpxeFEii", "channel": "姬蛋教你学画画", "channelUrl": "https://space.bilibili.com/544010526", "category": "动手创造", "minAge": 8, "caution": "小号，未深入审核内容", "reason": "简单插画教程"}, {"id": "BV1BspMeMERy", "title": "今天来教大家画草莓奶油可颂，来自插画师大力", "url": "https://www.bilibili.com/video/BV1BspMeMERy", "channel": "姬蛋教你学画画", "channelUrl": "https://space.bilibili.com/544010526", "category": "动手创造", "minAge": 8, "caution": "小号，未深入审核内容", "reason": "简单插画教程"}], "channels": [{"name": "无穷小亮的科普日常", "url": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨", "hasVideos": true}, {"name": "国家自然博物馆", "url": "https://space.bilibili.com/1313466763", "category": "自然动物", "minAge": 8, "caution": "更新慢、粉丝少", "reason": "官方馆，恐龙、标本讲解，短小干净", "hasVideos": true}, {"name": "芳斯塔芙", "url": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣", "hasVideos": true}, {"name": "我是不白吃", "url": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看", "hasVideos": true}, {"name": "中国国家地理", "url": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像", "hasVideos": true}, {"name": "星球研究所", "url": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理", "hasVideos": true}, {"name": "国家天文台", "url": "https://space.bilibili.com/592311716", "category": "地理天文", "minAge": 8, "caution": "更新频率一般", "reason": "中科院国家天文台官方，天文一手科普", "hasVideos": true}, {"name": "二次元的中科院物理所", "url": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿", "hasVideos": true}, {"name": "李永乐老师官方", "url": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚", "hasVideos": true}, {"name": "不刷题的吴姥姥", "url": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验", "hasVideos": true}, {"name": "科学火箭叔", "url": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手", "hasVideos": true}, {"name": "中国科学技术馆", "url": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频", "hasVideos": true}, {"name": "上海科技馆官方账号", "url": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览", "hasVideos": true}, {"name": "毕导", "url": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大", "hasVideos": true}, {"name": "科普中国", "url": "https://space.bilibili.com/92601724", "category": "科学实验", "minAge": 8, "caution": "偏成人健康话题，家长挑", "reason": "中国科协官方，健康与生活科学", "hasVideos": true}, {"name": "妈咪说MommyTalk", "url": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解", "hasVideos": true}, {"name": "3Blue1Brown", "url": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 11, "caution": "偏难，适合拔尖孩子", "reason": "官方中文版，动画讲数学之美", "hasVideos": true}, {"name": "国家博物馆", "url": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片", "hasVideos": true}, {"name": "故宫博物院", "url": "https://space.bilibili.com/630399926", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "故宫官方，每日文物与宫廷四季", "hasVideos": true}, {"name": "央视纪录", "url": "https://space.bilibili.com/72209046", "category": "历史文博", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等", "hasVideos": true}, {"name": "讲解员河森堡", "url": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史", "hasVideos": true}, {"name": "稚晖君", "url": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深", "reason": "硬核机器人DIY，激发工程梦", "hasVideos": true}, {"name": "手工耿", "url": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手", "hasVideos": true}, {"name": "编程猫", "url": "https://space.bilibili.com/205900972", "category": "动手创造", "minAge": 8, "caution": "以产品介绍为主，商业属性", "reason": "少儿图形化编程官方，教程向", "hasVideos": true}, {"name": "姬蛋教你学画画", "url": "https://space.bilibili.com/544010526", "category": "动手创造", "minAge": 8, "caution": "小号，未深入审核内容", "reason": "简单插画教程", "hasVideos": true}, {"name": "凡人修仙传", "url": "https://www.bilibili.com/bangumi/media/md28223043", "category": "动漫", "minAge": 12, "caution": "杀戮、斗法及残酷生存主题，家长陪看", "reason": "修仙成长故事，讨论选择与代价", "hasVideos": false}, {"name": "灵笼 第一季", "url": "https://www.bilibili.com/bangumi/media/md23432", "category": "动漫", "minAge": 16, "caution": "怪物、血腥、死亡与压抑主题，不建议小学生观看", "reason": "末日科幻的世界构建与人物抉择", "hasVideos": false}, {"name": "刺客伍六七（伍六七）", "url": "https://www.bilibili.com/bangumi/media/md6360", "category": "动漫", "minAge": 12, "caution": "刺杀、打斗、流血及成人笑话，家长陪看", "reason": "小岛武侠喜剧，讲善意与成长", "hasVideos": false}, {"name": "中国奇谭", "url": "https://www.bilibili.com/bangumi/media/md28235401", "category": "动漫", "minAge": 10, "caution": "《鹅鹅鹅》等诡异，《林林》等涉及死亡，家长选集", "reason": "中式短篇与多样画风，打开想象力", "hasVideos": false}, {"name": "雾山五行", "url": "https://www.bilibili.com/bangumi/media/md28228714", "category": "动漫", "minAge": 12, "caution": "高强度战斗、血腥及妖怪画面，家长陪看", "reason": "欣赏水墨美术和动作设计", "hasVideos": false}], "categories": ["自然动物", "地理天文", "科学实验", "数学", "历史文博", "动手创造"], "built": "2026-11-08"};
+const state = {
+  view: 'home',
+  q: '',
+  cat: '全部',
+  idx: 0,
+  dark: true,
+  tv: false,
+};
+
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return DATA.videos.filter(v => {
+    const catOk = state.cat === '全部' || v.category === state.cat;
+    const hay = (v.title + ' ' + v.channel + ' ' + v.category).toLowerCase();
+    return catOk && (!q || hay.includes(q));
+  });
+}
+
+function embedUrl(bv, autoplay=0) {
+  return `https://player.bilibili.com/player.html?bvid=${encodeURIComponent(bv)}&high_quality=1&danmaku=0&autoplay=${autoplay}&as_wide=1`;
+}
+
+function setTheme() {
+  document.documentElement.classList.toggle('light', !state.dark);
+  $('#btn-theme').textContent = state.dark ? '深色' : '浅色';
+}
+
+function setTV(on) {
+  state.tv = on;
+  document.body.classList.toggle('tv', on);
+  if (on) {
+    state.view = 'watch';
+    renderAll();
+    // force player refresh with autoplay preference off for safety
+    paintPlayers(0);
+  } else {
+    renderAll();
+  }
+}
+
+function paintPlayers(autoplay=0) {
+  const list = filtered();
+  if (!list.length) return;
+  if (state.idx >= list.length) state.idx = 0;
+  const v = list[state.idx];
+  const src = embedUrl(v.id, autoplay);
+  const iframe = $('#main-player');
+  const empty = $('#player-empty');
+  if (iframe) {
+    iframe.src = src;
+    iframe.hidden = false;
+    empty.hidden = true;
+  }
+  const tv = $('#tv-player');
+  if (tv) tv.src = src;
+  $('#now-title').textContent = v.title;
+  $('#now-meta').innerHTML = `<span>${esc(v.channel)}</span><span>${esc(v.category)}</span><span>建议 ${v.minAge}+</span><span>${esc(v.id)}</span>`;
+  $('#now-caution').textContent = v.caution ? ('家长提示：' + v.caution) : '';
+  $('#now-caution').hidden = !v.caution;
+  $('#open-bili').href = v.url;
+  $('#open-channel').href = v.channelUrl || '#';
+  $('#tv-title').textContent = v.title;
+  paintQueue(list);
+  highlightCards();
+}
+
+function paintQueue(list) {
+  const box = $('#queue');
+  box.innerHTML = list.slice(0, 40).map((v,i) => `
+    <button type="button" data-i="${i}" class="${i===state.idx?'on':''}">
+      <span class="t">${esc(v.title)}</span>
+      <span class="s">${esc(v.channel)} · ${esc(v.category)}</span>
+    </button>`).join('');
+  $$('#queue button').forEach(b => b.onclick = () => {
+    state.idx = Number(b.dataset.i);
+    paintPlayers(0);
+  });
+}
+
+function highlightCards() {
+  const list = filtered();
+  const cur = list[state.idx];
+  $$('.card').forEach(c => c.classList.toggle('on', cur && c.dataset.id === cur.id));
+}
+
+function esc(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderChips() {
+  const cats = ['全部', ...DATA.categories];
+  $('#chips').innerHTML = cats.map(c => `<button type="button" class="chip ${c===state.cat?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+  $$('#chips .chip').forEach(b => b.onclick = () => {
+    state.cat = b.dataset.cat;
+    state.idx = 0;
+    renderHome();
+    paintPlayers(0);
+  });
+}
+
+function renderHome() {
+  const list = filtered();
+  $('#result').textContent = `${list.length} 个手选视频 · 无推荐算法 · 嵌入 B 站官方播放器`;
+  $('#grid').innerHTML = list.map((v,i) => `
+    <button type="button" class="card" data-id="${esc(v.id)}" data-i="${i}">
+      <div class="thumb">
+        <span class="tag">${esc(v.category)}</span>
+        <span class="play">▶</span>
+        <span class="age">${v.minAge}+</span>
+      </div>
+      <div class="body">
+        <h3>${esc(v.title)}</h3>
+        <div class="sub">${esc(v.channel)} · ${esc(v.id)}</div>
+      </div>
+    </button>`).join('') || '<p class="empty">没有匹配项，换个分类或关键词试试。</p>';
+  $$('#grid .card').forEach(c => c.onclick = () => {
+    state.idx = Number(c.dataset.i);
+    state.view = 'watch';
+    renderAll();
+    paintPlayers(0);
+  });
+  renderChips();
+}
+
+function renderAbout() {
+  $('#about-kpis').innerHTML = `
+    <div class="kpi"><b>${DATA.videos.length}</b><span>手选视频</span></div>
+    <div class="kpi"><b>${DATA.channels.length}</b><span>频道 / 作品</span></div>
+    <div class="kpi"><b>${DATA.categories.length}</b><span>兴趣分类</span></div>`;
+}
+
+function showView() {
+  $$('.nav button').forEach(b => b.classList.toggle('on', b.dataset.view===state.view));
+  $('#view-home').classList.toggle('hidden', state.view!=='home');
+  $('#view-watch').classList.toggle('hidden', state.view!=='watch');
+  $('#view-about').classList.toggle('hidden', state.view!=='about');
+}
+
+function renderAll() {
+  showView();
+  if (state.view === 'home') renderHome();
+  if (state.view === 'about') renderAbout();
+  if (state.view === 'watch') {
+    renderHome(); // keep chips/grid state consistent if returning
+    paintPlayers(0);
+  }
+}
+
+function next(delta) {
+  const list = filtered();
+  if (!list.length) return;
+  state.idx = (state.idx + delta + list.length) % list.length;
+  paintPlayers(0);
+}
+
+$('#btn-theme').onclick = () => { state.dark = !state.dark; setTheme(); };
+$('#btn-tv').onclick = () => setTV(true);
+$('#btn-exit-tv').onclick = () => setTV(false);
+$('#btn-prev').onclick = () => next(-1);
+$('#btn-next').onclick = () => next(1);
+$('#tv-prev').onclick = () => next(-1);
+$('#tv-next').onclick = () => next(1);
+$$('.nav button').forEach(b => b.onclick = () => {
+  if (state.tv) setTV(false);
+  state.view = b.dataset.view;
+  renderAll();
+});
+$('#search').addEventListener('input', e => {
+  state.q = e.target.value;
+  state.idx = 0;
+  if (state.view === 'home') renderHome();
+  else paintPlayers(0);
+});
+
+document.addEventListener('keydown', e => {
+  const typing = document.activeElement && document.activeElement.tagName === 'INPUT';
+  if (e.key === '/' && !typing) { e.preventDefault(); $('#search').focus(); return; }
+  if (e.key === 'Escape' && state.tv) { setTV(false); return; }
+  if (typing) return;
+  if (e.key === 't' || e.key === 'T') { setTV(!state.tv); return; }
+  if (e.key === 'j' || e.key === 'ArrowRight') next(1);
+  if (e.key === 'k' || e.key === 'ArrowLeft') next(-1);
+  if (e.key === 'd' || e.key === 'D') { state.dark = !state.dark; setTheme(); }
+});
+
+setTheme();
+renderAll();
+paintPlayers(0);
+
+// TV layer visibility tied to body.tv
+const tvLayer = document.getElementById('tv-layer');
+const obs = new MutationObserver(() => {
+  const on = document.body.classList.contains('tv');
+  tvLayer.classList.toggle('hidden', !on);
+});
+obs.observe(document.body, {attributes:true, attributeFilter:['class']});
+document.getElementById('logo').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.body.classList.remove('tv');
+  // navigate home via nav button
+  document.querySelector('.nav button[data-view="home"]').click();
+});
+</script>
+</body>
+</html>
