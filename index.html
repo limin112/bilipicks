@@ -109,13 +109,19 @@ header{
 .thumb{
   aspect-ratio:16/9;background:
     linear-gradient(135deg, color-mix(in oklab, var(--accent) 35%, #111), #15151c 70%);
-  position:relative;display:grid;place-items:center;
+  position:relative;display:grid;place-items:center;overflow:hidden;
+}
+.thumb img.cover{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
 }
 .thumb .bv{font-size:12px;opacity:.7;letter-spacing:.4px}
 .thumb .play{
+  position:relative;z-index:1;
   width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.45);
   display:grid;place-items:center;color:#fff;font-size:18px;backdrop-filter:blur(4px)
 }
+.thumb.has-cover .play{opacity:.0;transition:opacity .15s}
+.card:hover .thumb.has-cover .play{opacity:1}
 .thumb .tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:3px 8px;border-radius:6px}
 .thumb .age{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:3px 7px;border-radius:6px}
 .card .body{padding:12px 14px 14px}
@@ -352,7 +358,8 @@ function renderHome() {
   $('#result').textContent = `${list.length} 个手选视频 · 无推荐算法 · 嵌入 B 站官方播放器`;
   $('#grid').innerHTML = list.map((v,i) => `
     <button type="button" class="card" data-id="${esc(v.id)}" data-i="${i}">
-      <div class="thumb">
+      <div class="thumb ${v.cover?'has-cover':''}" data-bvid="${esc(v.id)}">
+        ${v.cover?`<img class="cover" src="${esc(v.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}
         <span class="tag">${esc(v.category)}</span>
         <span class="play">▶</span>
         <span class="age">${v.minAge}+</span>
@@ -432,9 +439,79 @@ document.addEventListener('keydown', e => {
   if (e.key === 'd' || e.key === 'D') { state.dark = !state.dark; setTheme(); }
 });
 
+
+const COVER_CACHE_KEY = 'bilipicks-covers-v1';
+function loadCoverCache() {
+  try { return JSON.parse(localStorage.getItem(COVER_CACHE_KEY) || '{}'); } catch { return {}; }
+}
+function saveCoverCache(map) {
+  try { localStorage.setItem(COVER_CACHE_KEY, JSON.stringify(map)); } catch {}
+}
+async function fetchCoverUrl(bvid) {
+  const endpoints = [
+    `https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid='+bvid)}`,
+  ];
+  for (const url of endpoints) {
+    try {
+      const r = await fetch(url, { credentials: 'omit' });
+      if (!r.ok) continue;
+      const j = await r.json();
+      let pic = j && j.data && j.data.pic;
+      if (!pic && j && j.contents) {
+        const inner = JSON.parse(j.contents);
+        pic = inner && inner.data && inner.data.pic;
+      }
+      if (!pic) continue;
+      if (pic.startsWith('//')) pic = 'https:' + pic;
+      if (pic.startsWith('http://')) pic = 'https://' + pic.slice(7);
+      return pic;
+    } catch {}
+  }
+  return null;
+}
+async function hydrateCovers() {
+  const cache = loadCoverCache();
+  let changed = false;
+  for (const v of DATA.videos) {
+    if (v.cover) continue;
+    if (cache[v.id]) { v.cover = cache[v.id]; changed = true; continue; }
+  }
+  // apply cached first
+  if (changed) { renderHome(); if (state.view==='watch') paintPlayers(0); }
+  const missing = DATA.videos.filter(v => !v.cover);
+  const concurrency = 4;
+  let i = 0;
+  async function worker() {
+    while (i < missing.length) {
+      const v = missing[i++];
+      const pic = await fetchCoverUrl(v.id);
+      if (pic) {
+        v.cover = pic;
+        cache[v.id] = pic;
+        saveCoverCache(cache);
+        const thumb = document.querySelector(`.thumb[data-bvid="${CSS.escape(v.id)}"]`);
+        if (thumb && !thumb.querySelector('img.cover')) {
+          thumb.classList.add('has-cover');
+          const img = document.createElement('img');
+          img.className = 'cover';
+          img.alt = '';
+          img.loading = 'lazy';
+          img.referrerPolicy = 'no-referrer';
+          img.src = pic;
+          thumb.insertBefore(img, thumb.firstChild);
+        }
+      }
+    }
+  }
+  await Promise.all(Array.from({length: concurrency}, () => worker()));
+  if (state.view === 'home') renderHome();
+}
+
 setTheme();
 renderAll();
 paintPlayers(0);
+hydrateCovers();
 
 // TV layer visibility tied to body.tv
 const tvLayer = document.getElementById('tv-layer');
