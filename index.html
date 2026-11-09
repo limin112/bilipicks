@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="BiliPicks — Min 手选的小升初向 B 站视频播放页，含 AI 入门课，无推荐算法。">
+<meta name="description" content="BiliPicks — Min 手选的小升初向 B 站视频播放页：从零到深度学习的成长路线、B 站频道榜、AI 入门课，无推荐算法。">
 <title>BiliPicks · Min's B站精选播放器</title>
 <style>
 *{box-sizing:border-box}
@@ -156,8 +156,92 @@ body.tv #tv-layer{display:grid!important}
 .tv-bar h2{margin:0;font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tv-hint{color:#bbb;font-size:12px;white-space:nowrap}
 .empty{padding:40px 8px;color:var(--muted)}
+
+/* 看完标记 */
+.thumb .done{position:absolute;left:10px;bottom:10px;background:#1fa463;color:#fff;font-size:11px;padding:3px 8px;border-radius:6px;z-index:1}
+.card .dur{font-variant-numeric:tabular-nums}
+.pill.done-on{background:#1fa463;color:#fff}
+
+/* 首页路线横幅 */
+.path-banner{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px;padding:14px 16px;
+  border-radius:var(--radius);border:1px solid var(--bg3);
+  background:linear-gradient(120deg,color-mix(in oklab,var(--accent) 22%,var(--card)),var(--card) 60%);
+}
+.path-banner b{font-size:16px}
+.path-banner .sub{color:var(--muted);font-size:13px;flex:1;min-width:200px}
+
+/* 成长路线 */
+.path{max-width:900px}
+.path h1{font-size:28px;margin:6px 0 8px;letter-spacing:-.4px}
+.path .intro{color:var(--muted);line-height:1.8;margin:0 0 12px}
+.path .tips{margin:0 0 16px;padding-left:1.2em;color:var(--muted);line-height:1.8}
+.progress{height:8px;border-radius:999px;background:var(--bg3);overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#1fa463);border-radius:999px}
+.path-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 22px}
+.path-top .progress{flex:1;min-width:160px}
+.path-top .count{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.pstage{margin:0 0 26px}
+.stage-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.stage-head .no{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:14px;flex:none;align-self:center}
+.stage-head h2{margin:0;font-size:19px}
+.stage-head .age{color:var(--pink);font-size:12px;font-weight:650}
+.stage-head .count{margin-left:auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.pstage .goal{color:var(--muted);margin:0 0 10px 38px;line-height:1.7}
+.steps{display:flex;flex-direction:column;gap:8px;margin-left:38px}
+.step{
+  display:grid;grid-template-columns:28px 120px 1fr;gap:12px;align-items:center;text-align:left;
+  padding:8px 10px;border-radius:12px;background:var(--card);border:1px solid var(--bg3);
+}
+.step:hover{border-color:var(--accent)}
+.step .n{color:var(--muted);font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.step.is-done .n{color:#1fa463}
+.step .mini{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--bg3)}
+.step .mini img{width:100%;height:100%;object-fit:cover;display:block}
+.step .t{font-weight:650;line-height:1.4}
+.step .note{color:var(--fg);font-size:13px;margin-top:2px}
+.step .s{color:var(--muted);font-size:12px;margin-top:2px}
 @media(max-width:720px){
-  .nav{display:none}
+  .steps,.pstage .goal{margin-left:0}
+  .step{grid-template-columns:24px 88px 1fr;gap:10px}
+}
+
+/* 频道榜 */
+.tiers{max-width:1000px}
+.tiers h1{font-size:28px;margin:6px 0 8px;letter-spacing:-.4px}
+.tiers .lead{color:var(--muted);line-height:1.8;margin:0 0 10px}
+.tiers .lead a,.tiers .gaps a{color:var(--accent);text-decoration:underline}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 6px;font-size:12px;color:var(--muted)}
+.kid{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap}
+.kid.go{background:color-mix(in oklab,#1fa463 22%,transparent);color:#1fa463}
+.kid.interest{background:color-mix(in oklab,var(--accent) 22%,transparent);color:var(--accent)}
+.kid.pick{background:color-mix(in oklab,#e8a33d 25%,transparent);color:#d18b1f}
+.kid.later{background:var(--bg3);color:var(--muted)}
+.kid.unknown{background:var(--bg3);color:var(--muted)}
+.tier{margin:22px 0 0}
+.tier-head{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.tier-badge{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff;flex:none}
+.tier-badge.S{background:#ff5d6c}.tier-badge.A{background:#ff9f43}.tier-badge.B{background:#f7c948;color:#222}
+.tier-badge.C{background:#3ecf8e}.tier-badge.D{background:#4aa3ff}.tier-badge.O{background:var(--pink)}
+.tier-head h2{margin:0;font-size:18px}
+.tier-head .tsub{color:var(--muted);font-size:13px}
+.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.row{background:var(--card);border:1px solid var(--bg3);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.row .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row .name{font-weight:700;font-size:15px}
+.row .name:hover{color:var(--accent)}
+.row .what{line-height:1.6}
+.row .s{color:var(--muted);font-size:12px}
+.row .note{color:#d18b1f;font-size:12px}
+.tiers .gaps{color:var(--muted);line-height:1.8;padding-left:1.2em}
+
+@media(max-width:720px){
+  .app{grid-template-rows:auto 1fr}
+  header{flex-wrap:wrap;padding:8px 12px;gap:8px}
+  .nav{order:3;width:100%;margin:0;overflow-x:auto;scrollbar-width:none}
+  .nav button{white-space:nowrap;padding:6px 10px}
+  .search{order:4;flex-basis:100%;margin:0}
+  .tools{margin-left:auto}
   .view{padding:14px}
   .kpis{grid-template-columns:1fr}
   .tv-hint{display:none}
@@ -170,6 +254,8 @@ body.tv #tv-layer{display:grid!important}
     <a class="logo" href="#" id="logo"><span class="mark">B</span>BiliPicks</a>
     <nav class="nav" aria-label="主导航">
       <button type="button" data-view="home" class="on">首页</button>
+      <button type="button" data-view="path">成长路线</button>
+      <button type="button" data-view="tiers">频道榜</button>
       <button type="button" data-view="watch">播放</button>
       <button type="button" data-view="about">About</button>
     </nav>
@@ -182,6 +268,7 @@ body.tv #tv-layer{display:grid!important}
 
   <div class="stage">
     <section class="view" id="view-home">
+      <div class="path-banner" id="path-banner"></div>
       <div class="chips" id="chips"></div>
       <p class="sub" id="result" style="color:var(--muted);margin:0 0 12px"></p>
       <div class="grid" id="grid"></div>
@@ -205,6 +292,7 @@ body.tv #tv-layer{display:grid!important}
             <button type="button" class="pill primary" id="btn-next">下一条 · J</button>
             <a class="pill" id="open-bili" target="_blank" rel="noopener noreferrer" title="站内播放器最高 480P；到 B 站登录后可看 1080P">高清看 ↗ · H</a>
             <a class="pill" id="open-channel" target="_blank" rel="noopener noreferrer">UP 主页</a>
+            <button type="button" class="pill" id="btn-done">✓ 看完了</button>
             <button type="button" class="pill pink" onclick="document.getElementById('btn-tv').click()">TV 模式</button>
           </div>
           <div class="queue" id="queue" aria-label="播放队列"></div>
@@ -214,6 +302,14 @@ body.tv #tv-layer{display:grid!important}
       <p style="color:var(--muted);font-size:12px;margin-top:8px">提示：站内是 B 站官方嵌入播放器，B 站限制它最高 480P；想看 1080P，点「高清看」到 B 站播放（需要登录 B 站）。弹幕默认关闭。</p>
     </section>
 
+    <section class="view hidden" id="view-path">
+      <div class="path" id="path-root"></div>
+    </section>
+
+    <section class="view hidden" id="view-tiers">
+      <div class="tiers" id="tiers-root"></div>
+    </section>
+
     <section class="view hidden about" id="view-about">
       <div class="eyebrow" style="color:var(--muted);letter-spacing:1px;font-size:12px">ABOUT</div>
       <h1>为什么做 BiliPicks</h1>
@@ -221,6 +317,8 @@ body.tv #tv-layer{display:grid!important}
       <div class="kpis" id="about-kpis"></div>
       <h2>这个播放器有什么</h2>
       <ul>
+        <li><strong>成长路线</strong>：「从零到深度学习」7 个阶段，从科学和数学打底，到计算机和编程，再到神经网络。看完一条点「✓ 看完了」，进度记在这台设备上（换设备不同步）。</li>
+        <li><strong>频道榜</strong>：参考 Tristan Hume 的 YouTube Tier List，给 B 站频道分了 S～D 五档，每个都标了五六年级能不能看。</li>
         <li><strong>B 站风格浏览 + 内嵌官方播放器</strong>：只播清单里的视频，没有热度流。</li>
         <li><strong>深色 / 浅色</strong>：右上角切换，快捷键 <strong>D</strong>。</li>
         <li><strong>TV 模式</strong>：大屏懒看，藏掉导航；快捷键 <strong>T</strong> 进入，<strong>Esc</strong> 退出；左右键 / J K 切集。</li>
@@ -228,14 +326,14 @@ body.tv #tv-layer{display:grid!important}
         <li><strong>About</strong>：说明策展原则、家长提示与排除项。</li>
       </ul>
       <h2>AI 入门怎么看</h2>
-      <p>按第 1～5 课顺序看：AI 是什么 → 怎么学习 → 机器能不能思考 → ChatGPT 怎么说话 → AI 怎么画画。再看「AI 素养」学会不全信 AI，AlphaGo 纪录片和央视《智能时代》当故事看。Crash Course 21 集是系统课，3Blue1Brown 的神经网络是给数学好的孩子的进阶。播放页会显示每条的推荐理由。</p>
+      <p>按第 1～5 课顺序看：AI 是什么 → 怎么学习 → 机器能不能思考 → ChatGPT 怎么说话 → AI 怎么画画。再看「AI 素养」学会不全信 AI，AlphaGo 纪录片和央视《智能时代》当故事看。Crash Course 21 集是系统课。神经网络、GPT 这些放在「AI 进阶」，想一步步走到深度学习，就按「成长路线」的顺序看。播放页会显示每条的推荐理由。</p>
       <h2>使用前请知道</h2>
-      <p>这不是逐片审过的儿童白名单。频道与代表作 2026-11-08 整理，2026-11-09 按小升初重新筛选并加入 AI 入门；年龄是编辑建议，不是官方分级。商单、猎奇标题、实验危险画面仍需家长挑选。打开 B 站端仍可能出现推荐，建议关掉自动连播。</p>
+      <p>这不是逐片审过的儿童白名单。频道与代表作 2026-11-08 整理，2026-11-09 按小升初重新筛选并加入 AI 入门，2026-11-10 加入成长路线和频道榜；年龄是编辑建议，不是官方分级。商单、猎奇标题、实验危险画面仍需家长挑选。打开 B 站端仍可能出现推荐，建议关掉自动连播。</p>
       <h2>没放进来的</h2>
       <p>低龄营销向动画、法律/职场/战争黑色幽默、地缘政治、志怪恐怖（含名字像儿童故事的）、纯数码评测、来源不明的同名杂号，本轮都不收。这次重筛还去掉了产品介绍、活动 vlog、节日打卡帖和成人健康话题。</p>
       <h2>灵感</h2>
       <p>目录思路参考 <a href="https://karpathy.ai/tristan-tube/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">TristanTube</a>：人来挑，不靠推荐。本站不是 B 站官方产品。</p>
-      <p style="margin-top:24px">策展：<a href="https://x.com/MinLiBuilds" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">实践哥 Li · @MinLiBuilds</a> · 2026-11-09（Asia/Singapore）</p>
+      <p style="margin-top:24px">策展：<a href="https://x.com/MinLiBuilds" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">实践哥 Li · @MinLiBuilds</a> · 2026-11-10（Asia/Singapore）</p>
     </section>
 
     </div>
@@ -255,7 +353,7 @@ body.tv #tv-layer{display:grid!important}
   
 <script>
 
-const DATA = {"videos": [{"id": "BV1SH4y1A7DA", "title": "人工智能是如何工作的？机器学习和神经网络又是什么？", "url": "https://www.bilibili.com/video/BV1SH4y1A7DA", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "AI 入门", "minAge": 10, "caution": "", "reason": "第 1 课 · AI 是什么：从图灵的问题讲到机器学习和神经网络，18 分钟打底"}, {"id": "BV14p4y1h7zX", "title": "【TED-Ed】人工智能是如何学习的？（中英字幕）", "url": "https://www.bilibili.com/video/BV14p4y1h7zX", "channel": "Spectator-YYX", "channelUrl": "https://space.bilibili.com/171219028", "category": "AI 入门", "minAge": 10, "caution": "个人译制的 TED-Ed 动画，默认播放第 1P（中英字幕版）", "reason": "第 2 课 · AI 怎么学：5 分钟动画讲清监督学习、无监督学习、强化学习"}, {"id": "BV1Ei4y1b7Ci", "title": "【科普】什么是图灵测试？人造机器真的能思考吗? 计算机可以像人类一样进行交谈吗?", "url": "https://www.bilibili.com/video/BV1Ei4y1b7Ci", "channel": "煎蛋脑袋", "channelUrl": "https://space.bilibili.com/9912517", "category": "AI 入门", "minAge": 10, "caution": "转载的 TED-Ed 动画，配中文字幕", "reason": "第 3 课 · 机器能思考吗：图灵测试是什么，聊天机器人能不能骗过人"}, {"id": "BV1xmA2eMEFF", "title": "【官方双语】大语言模型的简要解释", "url": "https://www.bilibili.com/video/BV1xmA2eMEFF", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 入门", "minAge": 11, "caution": "有少量英文术语，可以暂停讲一讲", "reason": "第 4 课 · ChatGPT 怎么说话：大模型如何一个词一个词地“猜”出回答，8 分钟"}, {"id": "BV1nc411p7D9", "title": "【科普】你的文字是怎么变成图片的？-AI绘画底层原理拆解", "url": "https://www.bilibili.com/video/BV1nc411p7D9", "channel": "子牧说", "channelUrl": "https://space.bilibili.com/76991025", "category": "AI 入门", "minAge": 11, "caution": "2023 年的视频，提到的工具可能已经更新换代", "reason": "第 5 课 · AI 怎么画画：文字变图片的原理，不讲公式"}, {"id": "BV1S2xW6JECi", "title": "葫芦能让南瓜变有毒？“AI科普”不要太离谱！", "url": "https://www.bilibili.com/video/BV1S2xW6JECi", "channel": "中国食品报融媒体", "channelUrl": "https://space.bilibili.com/439478093", "category": "AI 入门", "minAge": 10, "caution": "", "reason": "AI 素养 · 拆穿“AI 外星人科普”短视频里的错误，学会不全信 AI 生成的内容"}, {"id": "BV1Ct411u71n", "title": "【Netflix】阿尔法狗 AlphaGo (2017)", "url": "https://www.bilibili.com/video/BV1Ct411u71n", "channel": "喜欢喵喵叫的小猫咪", "channelUrl": "https://space.bilibili.com/23279213", "category": "AI 入门", "minAge": 10, "caution": "转载的 90 分钟纪录片，可分两次看；转载视频有可能失效", "reason": "故事 · AI 第一次在围棋上战胜世界冠军的完整经过"}, {"id": "BV1P7411r7Dw", "title": "【速成课：人工智能】Ai - [21集全/中英双语] - Artificial Intelligence", "url": "https://www.bilibili.com/video/BV1P7411r7Dw", "channel": "机器树的杂货铺", "channelUrl": "https://space.bilibili.com/392397276", "category": "AI 入门", "minAge": 11, "caution": "转载合集，站内默认第 1 集，其余集数点「高清看」到 B 站选集", "reason": "系统课 · Crash Course AI 共 21 集，每集约 12 分钟，从机器学习讲到 AI 伦理"}, {"id": "BV1as4y1q73s", "title": "【央视纪录片】《智能时代》（全6集）人工智能、Chatgpt如何改变世界？", "url": "https://www.bilibili.com/video/BV1as4y1q73s", "channel": "复利的奇迹价值投资", "channelUrl": "https://space.bilibili.com/383587023", "category": "AI 入门", "minAge": 11, "caution": "非官方转载，可能失效；站内默认第 1 集", "reason": "纪录片 · 央视 6 集，看 AI 在医疗、交通、科研里的真实应用"}, {"id": "BV17C4P6CE5f", "title": "【漫士】AI时代，数学该何去何从？还能学吗？", "url": "https://www.bilibili.com/video/BV17C4P6CE5f", "channel": "漫士沉思录", "channelUrl": "https://space.bilibili.com/266765166", "category": "AI 入门", "minAge": 11, "caution": "40 分钟、偏谈话，适合家长陪看一起聊", "reason": "小升初必看 · AI 什么都会了，为什么还要学好数学"}, {"id": "BV1bx411M7Zx", "title": "【官方双语】深度学习之神经网络的结构 Part 1 ver 2.0", "url": "https://www.bilibili.com/video/BV1bx411M7Zx", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 入门", "minAge": 12, "caution": "老视频画质一般；有些数学，看不懂可以先跳过", "reason": "进阶 · 用识别手写数字讲清神经网络的结构，适合数学好、爱钻研的孩子"}, {"id": "BV18wxY63Erp", "title": "网络热传生物鉴定 第65期", "url": "https://www.bilibili.com/video/BV18wxY63Erp", "channel": "无穷小亮的科普日常", "channelUrl": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨"}, {"id": "BV17wn96PERn", "title": "亮记闲谈-如果恐龙活着它的肉是什么味？", "url": "https://www.bilibili.com/video/BV17wn96PERn", "channel": "无穷小亮的科普日常", "channelUrl": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨"}, {"id": "BV1Nk346UE6G", "title": "国家自然博物馆里的霸王龙真不简单！", "url": "https://www.bilibili.com/video/BV1Nk346UE6G", "channel": "江氏小盗龙", "channelUrl": "https://space.bilibili.com/10613291", "category": "自然动物", "minAge": 8, "caution": "单条很短", "reason": "官方馆，恐龙、标本讲解，短小干净"}, {"id": "BV1YGEE6XEMx", "title": "国家自然博物馆里的“匹诺曹”恐龙", "url": "https://www.bilibili.com/video/BV1YGEE6XEMx", "channel": "江氏小盗龙", "channelUrl": "https://space.bilibili.com/10613291", "category": "自然动物", "minAge": 8, "caution": "单条很短", "reason": "官方馆，恐龙、标本讲解，短小干净"}, {"id": "BV1qfxB6qEjD", "title": "【鬼谷闲谈】沧龙：问君能有几多愁，恰似鳞龙入海流", "url": "https://www.bilibili.com/video/BV1qfxB6qEjD", "channel": "芳斯塔芙", "channelUrl": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣"}, {"id": "BV1aMpu6MEdc", "title": "【科学史】那些年，科学家用光遗传做的鬼畜实验……", "url": "https://www.bilibili.com/video/BV1aMpu6MEdc", "channel": "芳斯塔芙", "channelUrl": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣"}, {"id": "BV1di4u6XEKc", "title": "【我是不白吃】1102 长得丑吃着香，危险的海中美味“海鳝”", "url": "https://www.bilibili.com/video/BV1di4u6XEKc", "channel": "我是不白吃", "channelUrl": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看"}, {"id": "BV1Za4u6xE46", "title": "【我是不白吃】1101 没有这种小虫子，十三香可能要变十二香了！", "url": "https://www.bilibili.com/video/BV1Za4u6xE46", "channel": "我是不白吃", "channelUrl": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看"}, {"id": "BV1XQ4P6MEEx", "title": "焚风中的昆虫，竟能享受甜品夜市？", "url": "https://www.bilibili.com/video/BV1XQ4P6MEEx", "channel": "中国国家地理", "channelUrl": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像"}, {"id": "BV17Px16tESS", "title": "这条分界线，正在制造中国最年轻的陆地", "url": "https://www.bilibili.com/video/BV17Px16tESS", "channel": "中国国家地理", "channelUrl": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像"}, {"id": "BV1DhxK6iEgj", "title": "或许无法取胜，但我们绝不认输。", "url": "https://www.bilibili.com/video/BV1DhxK6iEgj", "channel": "星球研究所", "channelUrl": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理"}, {"id": "BV1ABWc6zEBk", "title": "“比死亡先来的，是搜救犬的鼻筒子。”", "url": "https://www.bilibili.com/video/BV1ABWc6zEBk", "channel": "星球研究所", "channelUrl": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理"}, {"id": "BV1BA4662EfB", "title": "蚊子嘴竟是目前最精密的3D打印针头？！", "url": "https://www.bilibili.com/video/BV1BA4662EfB", "channel": "二次元的中科院物理所", "channelUrl": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿"}, {"id": "BV1jN4B6BENJ", "title": "中国科学家打破人类低温纪录：在空间站制备最冷物质", "url": "https://www.bilibili.com/video/BV1jN4B6BENJ", "channel": "二次元的中科院物理所", "channelUrl": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿"}, {"id": "BV1Xzxv6XESu", "title": "人推墙没推动，人对墙做功吗？", "url": "https://www.bilibili.com/video/BV1Xzxv6XESu", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚"}, {"id": "BV1GYso65EgU", "title": "近视眼和老花眼能相互抵消吗？", "url": "https://www.bilibili.com/video/BV1GYso65EgU", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚"}, {"id": "BV1fXxK6HEUY", "title": "诺奖百人科普接力|第1棒：你知道X射线的故事吗？你知道第一届诺贝尔物理学奖的颁给了谁吗？3分钟带你走进1895年的那个夜晚...", "url": "https://www.bilibili.com/video/BV1fXxK6HEUY", "channel": "不刷题的吴姥姥", "channelUrl": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验"}, {"id": "BV15NnJ6PEKM", "title": "在玻璃栈道上跳广场舞？！命都不要了？共振现象很可能造成“桥毁人亡”！", "url": "https://www.bilibili.com/video/BV15NnJ6PEKM", "channel": "不刷题的吴姥姥", "channelUrl": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验"}, {"id": "BV1L94M6pEnN", "title": "同样都滴水！空调和一级能效热水器的冷凝水，差别究竟在哪？", "url": "https://www.bilibili.com/video/BV1L94M6pEnN", "channel": "科学火箭叔", "channelUrl": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手"}, {"id": "BV1Q84v6XEQk", "title": "香蕉也能操作手机？我们在科技馆做了个实验", "url": "https://www.bilibili.com/video/BV1Q84v6XEQk", "channel": "中国科学技术馆", "channelUrl": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频"}, {"id": "BV1mpxX6tExK", "title": "揭秘天宫实验柜：为什么太空能合成地球造不出的材料？", "url": "https://www.bilibili.com/video/BV1mpxX6tExK", "channel": "中国科学技术馆", "channelUrl": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频"}, {"id": "BV1Hwp46KEC5", "title": "2026诺贝尔化学奖解读：分清左手右手竟能获诺奖？！", "url": "https://www.bilibili.com/video/BV1Hwp46KEC5", "channel": "上海科技馆官方账号", "channelUrl": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览"}, {"id": "BV1a3YE6WE7F", "title": "当身体被大脑欺骗，揭秘VR大空间创作全流程！", "url": "https://www.bilibili.com/video/BV1a3YE6WE7F", "channel": "上海科技馆官方账号", "channelUrl": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览"}, {"id": "BV1VVhk6pEiR", "title": "【毕导】这个X你肯定见过，但它其实根本不存在", "url": "https://www.bilibili.com/video/BV1VVhk6pEiR", "channel": "毕导", "channelUrl": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大"}, {"id": "BV12pnJ6DExY", "title": "可控核聚变，还要等50年吗？中国“人造太阳”走到哪了", "url": "https://www.bilibili.com/video/BV12pnJ6DExY", "channel": "妈咪说MommyTalk", "channelUrl": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解"}, {"id": "BV1XzHk6wEdw", "title": "如何在冰里探测“幽灵粒子”？2026年物理学诺奖解读", "url": "https://www.bilibili.com/video/BV1XzHk6wEdw", "channel": "妈咪说MommyTalk", "channelUrl": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解"}, {"id": "BV1EW411p727", "title": "【官方双语】“π”=圆周率的由来：欧拉差点把“π”设置为6.283185了吗？", "url": "https://www.bilibili.com/video/BV1EW411p727", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 10, "caution": "", "reason": "六年级学圆正好看：π 这个符号和数值是怎么来的，6 分钟"}, {"id": "BV1znaf61EnS", "title": "【官方双语】AI 未能解决的最后一道IMO真题", "url": "https://www.bilibili.com/video/BV1znaf61EnS", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 12, "caution": "52 分钟、难度很高，适合数学拔尖、想挑战的孩子", "reason": "官方中文版，动画讲数学之美"}, {"id": "BV1nc4J6tEqv", "title": "古代数学里的高考原题", "url": "https://www.bilibili.com/video/BV1nc4J6tEqv", "channel": "央视纪录", "channelUrl": "https://space.bilibili.com/72209046", "category": "数学", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等"}, {"id": "BV1A34z6pERE", "title": "56乘78古人竟然能用竹棍算出来！", "url": "https://www.bilibili.com/video/BV1A34z6pERE", "channel": "央视纪录", "channelUrl": "https://space.bilibili.com/72209046", "category": "数学", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等"}, {"id": "BV1nb4e6vEPK", "title": "精品文物簿｜独具匠心的四羊方尊", "url": "https://www.bilibili.com/video/BV1nb4e6vEPK", "channel": "国家博物馆", "channelUrl": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片"}, {"id": "BV1thxP6ZEWp", "title": "精品文物簿｜玉人：窥见殷商面容", "url": "https://www.bilibili.com/video/BV1thxP6ZEWp", "channel": "国家博物馆", "channelUrl": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片"}, {"id": "BV1XFx56fE3M", "title": "错金银云纹犀牛尊，195件国宝番外篇", "url": "https://www.bilibili.com/video/BV1XFx56fE3M", "channel": "讲解员河森堡", "channelUrl": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史"}, {"id": "BV1fV411x72a", "title": "【自制】我把自行车做成了 自 动 驾 驶 ！！【硬核】", "url": "https://www.bilibili.com/video/BV1fV411x72a", "channel": "稚晖君", "channelUrl": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深，看个热闹也值", "reason": "经典作品：自己设计电路、写程序，让自行车自己平衡、自己走，和 AI 课连着看"}, {"id": "BV12341117rG", "title": "【自制】我造了一台钢铁侠的迷你机械臂 ！【硬核】", "url": "https://www.bilibili.com/video/BV12341117rG", "channel": "稚晖君", "channelUrl": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深，看个热闹也值", "reason": "经典作品：从零设计一台 6 轴机械臂，看工程师怎么把想法变成实物"}, {"id": "BV1Ljtt6VEAS", "title": "弄了口大钢牙", "url": "https://www.bilibili.com/video/BV1Ljtt6VEAS", "channel": "手工耿", "channelUrl": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手"}], "channels": [{"name": "李永乐老师官方", "url": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚", "hasVideos": true}, {"name": "Spectator-YYX", "url": "https://space.bilibili.com/171219028", "category": "AI 入门", "minAge": 10, "caution": "个人译制", "reason": "TED-Ed 动画中英字幕", "hasVideos": true}, {"name": "煎蛋脑袋", "url": "https://space.bilibili.com/9912517", "category": "AI 入门", "minAge": 10, "caution": "转载", "reason": "TED-Ed 动画中文字幕", "hasVideos": true}, {"name": "3Blue1Brown", "url": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 11, "caution": "偏难，适合拔尖孩子", "reason": "官方中文版，动画讲数学之美", "hasVideos": true}, {"name": "子牧说", "url": "https://space.bilibili.com/76991025", "category": "AI 入门", "minAge": 11, "caution": "2023 年内容", "reason": "AI 绘画原理入门", "hasVideos": true}, {"name": "中国食品报融媒体", "url": "https://space.bilibili.com/439478093", "category": "AI 入门", "minAge": 10, "caution": "", "reason": "辟谣类内容，培养对 AI 生成内容的判断力", "hasVideos": true}, {"name": "喜欢喵喵叫的小猫咪", "url": "https://space.bilibili.com/23279213", "category": "AI 入门", "minAge": 10, "caution": "转载，可能失效", "reason": "AlphaGo 纪录片", "hasVideos": true}, {"name": "机器树的杂货铺", "url": "https://space.bilibili.com/392397276", "category": "AI 入门", "minAge": 11, "caution": "转载，可能失效", "reason": "Crash Course AI 中英双语", "hasVideos": true}, {"name": "复利的奇迹价值投资", "url": "https://space.bilibili.com/383587023", "category": "AI 入门", "minAge": 11, "caution": "转载，可能失效", "reason": "央视纪录片《智能时代》", "hasVideos": true}, {"name": "漫士沉思录", "url": "https://space.bilibili.com/266765166", "category": "AI 入门", "minAge": 11, "caution": "视频较长、偏谈话", "reason": "数学与思维科普", "hasVideos": true}, {"name": "无穷小亮的科普日常", "url": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨", "hasVideos": true}, {"name": "江氏小盗龙", "url": "https://space.bilibili.com/10613291", "category": "自然动物", "minAge": 8, "caution": "单条很短", "reason": "古生物科普 UP 主，恐龙知识短小精炼", "hasVideos": true}, {"name": "芳斯塔芙", "url": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣", "hasVideos": true}, {"name": "我是不白吃", "url": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看", "hasVideos": true}, {"name": "中国国家地理", "url": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像", "hasVideos": true}, {"name": "星球研究所", "url": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理", "hasVideos": true}, {"name": "二次元的中科院物理所", "url": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿", "hasVideos": true}, {"name": "不刷题的吴姥姥", "url": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验", "hasVideos": true}, {"name": "科学火箭叔", "url": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手", "hasVideos": true}, {"name": "中国科学技术馆", "url": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频", "hasVideos": true}, {"name": "上海科技馆官方账号", "url": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览", "hasVideos": true}, {"name": "毕导", "url": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大", "hasVideos": true}, {"name": "妈咪说MommyTalk", "url": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解", "hasVideos": true}, {"name": "央视纪录", "url": "https://space.bilibili.com/72209046", "category": "历史文博", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等", "hasVideos": true}, {"name": "国家博物馆", "url": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片", "hasVideos": true}, {"name": "讲解员河森堡", "url": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史", "hasVideos": true}, {"name": "稚晖君", "url": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深", "reason": "硬核机器人DIY，激发工程梦", "hasVideos": true}, {"name": "手工耿", "url": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手", "hasVideos": true}, {"name": "凡人修仙传", "url": "https://www.bilibili.com/bangumi/media/md28223043", "category": "动漫", "minAge": 12, "caution": "杀戮、斗法及残酷生存主题，家长陪看", "reason": "修仙成长故事，讨论选择与代价", "hasVideos": false}, {"name": "刺客伍六七（伍六七）", "url": "https://www.bilibili.com/bangumi/media/md6360", "category": "动漫", "minAge": 12, "caution": "刺杀、打斗、流血及成人笑话，家长陪看", "reason": "小岛武侠喜剧，讲善意与成长", "hasVideos": false}, {"name": "中国奇谭", "url": "https://www.bilibili.com/bangumi/media/md28235401", "category": "动漫", "minAge": 10, "caution": "《鹅鹅鹅》等诡异，《林林》等涉及死亡，家长选集", "reason": "中式短篇与多样画风，打开想象力", "hasVideos": false}, {"name": "雾山五行", "url": "https://www.bilibili.com/bangumi/media/md28228714", "category": "动漫", "minAge": 12, "caution": "高强度战斗、血腥及妖怪画面，家长陪看", "reason": "欣赏水墨美术和动作设计", "hasVideos": false}], "categories": ["AI 入门", "自然动物", "地理天文", "科学实验", "数学", "历史文博", "动手创造"], "built": "2026-11-09"};
+const DATA = {"videos": [{"id": "BV1SH4y1A7DA", "title": "人工智能是如何工作的？机器学习和神经网络又是什么？", "url": "https://www.bilibili.com/video/BV1SH4y1A7DA", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "AI 入门", "minAge": 10, "caution": "", "reason": "第 1 课 · AI 是什么：从图灵的问题讲到机器学习和神经网络，18 分钟打底", "cover": "https://i2.hdslb.com/bfs/archive/4d498753d321fc15b5f3e929eac18a89187aa1ca.jpg@672w_378h_1c.webp", "duration": 1090}, {"id": "BV14p4y1h7zX", "title": "【TED-Ed】人工智能是如何学习的？（中英字幕）", "url": "https://www.bilibili.com/video/BV14p4y1h7zX", "channel": "Spectator-YYX", "channelUrl": "https://space.bilibili.com/171219028", "category": "AI 入门", "minAge": 10, "caution": "个人译制的 TED-Ed 动画，默认播放第 1P（中英字幕版）", "reason": "第 2 课 · AI 怎么学：5 分钟动画讲清监督学习、无监督学习、强化学习", "cover": "https://i0.hdslb.com/bfs/archive/ec5b7fc3ccbc1cb1cfadb674f82bf6c56ffd5962.png@672w_378h_1c.webp", "duration": 297, "parts": 3}, {"id": "BV1Ei4y1b7Ci", "title": "【科普】什么是图灵测试？人造机器真的能思考吗? 计算机可以像人类一样进行交谈吗?", "url": "https://www.bilibili.com/video/BV1Ei4y1b7Ci", "channel": "煎蛋脑袋", "channelUrl": "https://space.bilibili.com/9912517", "category": "AI 入门", "minAge": 10, "caution": "转载的 TED-Ed 动画，配中文字幕", "reason": "第 3 课 · 机器能思考吗：图灵测试是什么，聊天机器人能不能骗过人", "cover": "https://i2.hdslb.com/bfs/archive/ce06bf0bf9b6144d54428d46695f4d38f915ab99.jpg@672w_378h_1c.webp", "duration": 283}, {"id": "BV1xmA2eMEFF", "title": "【官方双语】大语言模型的简要解释", "url": "https://www.bilibili.com/video/BV1xmA2eMEFF", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 入门", "minAge": 11, "caution": "有少量英文术语，可以暂停讲一讲", "reason": "第 4 课 · ChatGPT 怎么说话：大模型如何一个词一个词地“猜”出回答，8 分钟", "cover": "https://i1.hdslb.com/bfs/archive/974702616ef3fa1568dd47519bc674e139661740.jpg@672w_378h_1c.webp", "duration": 478}, {"id": "BV1nc411p7D9", "title": "【科普】你的文字是怎么变成图片的？-AI绘画底层原理拆解", "url": "https://www.bilibili.com/video/BV1nc411p7D9", "channel": "子牧说", "channelUrl": "https://space.bilibili.com/76991025", "category": "AI 入门", "minAge": 11, "caution": "2023 年的视频，提到的工具可能已经更新换代", "reason": "第 5 课 · AI 怎么画画：文字变图片的原理，不讲公式", "cover": "https://i2.hdslb.com/bfs/archive/f75d019f73f34ad58bd569e648ccad7767d30522.jpg@672w_378h_1c.webp", "duration": 340}, {"id": "BV1S2xW6JECi", "title": "葫芦能让南瓜变有毒？“AI科普”不要太离谱！", "url": "https://www.bilibili.com/video/BV1S2xW6JECi", "channel": "中国食品报融媒体", "channelUrl": "https://space.bilibili.com/439478093", "category": "AI 入门", "minAge": 10, "caution": "", "reason": "AI 素养 · 拆穿“AI 外星人科普”短视频里的错误，学会不全信 AI 生成的内容", "cover": "https://i1.hdslb.com/bfs/archive/e67694ec1e744d2ae0809e5d89bc17021961acd0.jpg@672w_378h_1c.webp", "duration": 487}, {"id": "BV1Ct411u71n", "title": "【Netflix】阿尔法狗 AlphaGo (2017)", "url": "https://www.bilibili.com/video/BV1Ct411u71n", "channel": "喜欢喵喵叫的小猫咪", "channelUrl": "https://space.bilibili.com/23279213", "category": "AI 入门", "minAge": 10, "caution": "转载的 90 分钟纪录片，可分两次看；转载视频有可能失效", "reason": "故事 · AI 第一次在围棋上战胜世界冠军的完整经过", "cover": "https://i2.hdslb.com/bfs/archive/56c7622bd931ddf70f182d82642ca51cc32e00af.jpg@672w_378h_1c.webp", "duration": 5429}, {"id": "BV1P7411r7Dw", "title": "【速成课：人工智能】Ai - [21集全/中英双语] - Artificial Intelligence", "url": "https://www.bilibili.com/video/BV1P7411r7Dw", "channel": "机器树的杂货铺", "channelUrl": "https://space.bilibili.com/392397276", "category": "AI 入门", "minAge": 11, "caution": "转载合集，站内默认第 1 集，其余集数点「高清看」到 B 站选集", "reason": "系统课 · Crash Course AI 共 21 集，每集约 12 分钟，从机器学习讲到 AI 伦理", "cover": "https://i1.hdslb.com/bfs/archive/843d7fc9863794d21b0a6623f4b71b7dda3545b3.jpg@672w_378h_1c.webp", "duration": 231, "parts": 21}, {"id": "BV1as4y1q73s", "title": "【央视纪录片】《智能时代》（全6集）人工智能、Chatgpt如何改变世界？", "url": "https://www.bilibili.com/video/BV1as4y1q73s", "channel": "复利的奇迹价值投资", "channelUrl": "https://space.bilibili.com/383587023", "category": "AI 入门", "minAge": 11, "caution": "非官方转载，可能失效；站内默认第 1 集", "reason": "纪录片 · 央视 6 集，看 AI 在医疗、交通、科研里的真实应用", "cover": "https://i2.hdslb.com/bfs/archive/2503347aeee94757e6b7be357669d47075bc090f.jpg@672w_378h_1c.webp", "duration": 2893, "parts": 7}, {"id": "BV17C4P6CE5f", "title": "【漫士】AI时代，数学该何去何从？还能学吗？", "url": "https://www.bilibili.com/video/BV17C4P6CE5f", "channel": "漫士沉思录", "channelUrl": "https://space.bilibili.com/266765166", "category": "AI 入门", "minAge": 11, "caution": "40 分钟、偏谈话，适合家长陪看一起聊", "reason": "小升初必看 · AI 什么都会了，为什么还要学好数学", "cover": "https://i0.hdslb.com/bfs/archive/33daf1a047ebde87c3e8b82f5ab1704b35a5a392.jpg@672w_378h_1c.webp", "duration": 2440}, {"id": "BV1bx411M7Zx", "title": "【官方双语】深度学习之神经网络的结构 Part 1 ver 2.0", "url": "https://www.bilibili.com/video/BV1bx411M7Zx", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 进阶", "minAge": 12, "caution": "老视频画质一般；有些数学，看不懂可以先跳过", "reason": "进阶 · 用识别手写数字讲清神经网络的结构，适合数学好、爱钻研的孩子", "cover": "https://i2.hdslb.com/bfs/archive/3fddf427ddef5a78105deb60180727a7ad47c4d8.jpg@672w_378h_1c.webp", "duration": 1153}, {"id": "BV18wxY63Erp", "title": "网络热传生物鉴定 第65期", "url": "https://www.bilibili.com/video/BV18wxY63Erp", "channel": "无穷小亮的科普日常", "channelUrl": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨", "cover": "https://i0.hdslb.com/bfs/archive/cc1268369b56f9007ae8cfc366742a3f0b4b03cc.jpg@672w_378h_1c.webp", "duration": 557}, {"id": "BV17wn96PERn", "title": "亮记闲谈-如果恐龙活着它的肉是什么味？", "url": "https://www.bilibili.com/video/BV17wn96PERn", "channel": "无穷小亮的科普日常", "channelUrl": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨", "cover": "https://i2.hdslb.com/bfs/archive/4b0841817dd4b0d38109d0c43881f265ca079357.jpg@672w_378h_1c.webp", "duration": 1027}, {"id": "BV1Nk346UE6G", "title": "国家自然博物馆里的霸王龙真不简单！", "url": "https://www.bilibili.com/video/BV1Nk346UE6G", "channel": "江氏小盗龙", "channelUrl": "https://space.bilibili.com/10613291", "category": "自然动物", "minAge": 8, "caution": "单条很短", "reason": "官方馆，恐龙、标本讲解，短小干净", "cover": "https://i0.hdslb.com/bfs/archive/e5013601e201bc935d5df2b1f505a11abd813303.jpg@672w_378h_1c.webp", "duration": 87}, {"id": "BV1YGEE6XEMx", "title": "国家自然博物馆里的“匹诺曹”恐龙", "url": "https://www.bilibili.com/video/BV1YGEE6XEMx", "channel": "江氏小盗龙", "channelUrl": "https://space.bilibili.com/10613291", "category": "自然动物", "minAge": 8, "caution": "单条很短", "reason": "官方馆，恐龙、标本讲解，短小干净", "cover": "https://i2.hdslb.com/bfs/archive/b4fd1cb2989012c1547e941a0f6944daac095653.jpg@672w_378h_1c.webp", "duration": 72}, {"id": "BV1qfxB6qEjD", "title": "【鬼谷闲谈】沧龙：问君能有几多愁，恰似鳞龙入海流", "url": "https://www.bilibili.com/video/BV1qfxB6qEjD", "channel": "芳斯塔芙", "channelUrl": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣", "cover": "https://i0.hdslb.com/bfs/archive/c7cb0238f06c0592a32d5dbf7f5d383f255f25e2.jpg@672w_378h_1c.webp", "duration": 1106}, {"id": "BV1aMpu6MEdc", "title": "【科学史】那些年，科学家用光遗传做的鬼畜实验……", "url": "https://www.bilibili.com/video/BV1aMpu6MEdc", "channel": "芳斯塔芙", "channelUrl": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣", "cover": "https://i0.hdslb.com/bfs/archive/ba651463c1e067cdabaa9becaf0688f46644161b.jpg@672w_378h_1c.webp", "duration": 491}, {"id": "BV1di4u6XEKc", "title": "【我是不白吃】1102 长得丑吃着香，危险的海中美味“海鳝”", "url": "https://www.bilibili.com/video/BV1di4u6XEKc", "channel": "我是不白吃", "channelUrl": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看", "cover": "https://i2.hdslb.com/bfs/archive/b097c9b5465202d1db0ae5552b03213711694cc3.jpg@672w_378h_1c.webp", "duration": 78}, {"id": "BV1Za4u6xE46", "title": "【我是不白吃】1101 没有这种小虫子，十三香可能要变十二香了！", "url": "https://www.bilibili.com/video/BV1Za4u6xE46", "channel": "我是不白吃", "channelUrl": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看", "cover": "https://i1.hdslb.com/bfs/archive/536f8ce9059007860c4d92d98c59e112bd88b06c.jpg@672w_378h_1c.webp", "duration": 60}, {"id": "BV1XQ4P6MEEx", "title": "焚风中的昆虫，竟能享受甜品夜市？", "url": "https://www.bilibili.com/video/BV1XQ4P6MEEx", "channel": "中国国家地理", "channelUrl": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像", "cover": "https://i2.hdslb.com/bfs/archive/f0511c0b5d44025af624fc61c4d4eb54654765be.jpg@672w_378h_1c.webp", "duration": 284}, {"id": "BV17Px16tESS", "title": "这条分界线，正在制造中国最年轻的陆地", "url": "https://www.bilibili.com/video/BV17Px16tESS", "channel": "中国国家地理", "channelUrl": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像", "cover": "https://i0.hdslb.com/bfs/archive/9f8242992dbbd28e174f2f7f789e0d0b7a95fde4.jpg@672w_378h_1c.webp", "duration": 190}, {"id": "BV1DhxK6iEgj", "title": "或许无法取胜，但我们绝不认输。", "url": "https://www.bilibili.com/video/BV1DhxK6iEgj", "channel": "星球研究所", "channelUrl": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理", "cover": "https://i2.hdslb.com/bfs/archive/75be942359161e621ad45e96ca855ea181338642.jpg@672w_378h_1c.webp", "duration": 740}, {"id": "BV1ABWc6zEBk", "title": "“比死亡先来的，是搜救犬的鼻筒子。”", "url": "https://www.bilibili.com/video/BV1ABWc6zEBk", "channel": "星球研究所", "channelUrl": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理", "cover": "https://i0.hdslb.com/bfs/archive/cb48bd462a99eb6141370024e4ea5552aa00d216.jpg@672w_378h_1c.webp", "duration": 882}, {"id": "BV1BA4662EfB", "title": "蚊子嘴竟是目前最精密的3D打印针头？！", "url": "https://www.bilibili.com/video/BV1BA4662EfB", "channel": "二次元的中科院物理所", "channelUrl": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿", "cover": "https://i0.hdslb.com/bfs/archive/f9435f4cfefed75c0df3985b7a20102474380f52.jpg@672w_378h_1c.webp", "duration": 141}, {"id": "BV1jN4B6BENJ", "title": "中国科学家打破人类低温纪录：在空间站制备最冷物质", "url": "https://www.bilibili.com/video/BV1jN4B6BENJ", "channel": "二次元的中科院物理所", "channelUrl": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿", "cover": "https://i2.hdslb.com/bfs/archive/753ddb86a13fb74ca632b6fc0bd8aa968fefc17d.jpg@672w_378h_1c.webp", "duration": 545}, {"id": "BV1Xzxv6XESu", "title": "人推墙没推动，人对墙做功吗？", "url": "https://www.bilibili.com/video/BV1Xzxv6XESu", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚", "cover": "https://i0.hdslb.com/bfs/archive/69f7426f81a8935de3f83790d940799d4348f217.jpg@672w_378h_1c.webp", "duration": 253}, {"id": "BV1GYso65EgU", "title": "近视眼和老花眼能相互抵消吗？", "url": "https://www.bilibili.com/video/BV1GYso65EgU", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚", "cover": "https://i2.hdslb.com/bfs/archive/2231ce8f8cc856e8f4a2aca131e84ccf95522455.jpg@672w_378h_1c.webp", "duration": 257}, {"id": "BV1fXxK6HEUY", "title": "诺奖百人科普接力|第1棒：你知道X射线的故事吗？你知道第一届诺贝尔物理学奖的颁给了谁吗？3分钟带你走进1895年的那个夜晚...", "url": "https://www.bilibili.com/video/BV1fXxK6HEUY", "channel": "不刷题的吴姥姥", "channelUrl": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验", "cover": "https://i1.hdslb.com/bfs/archive/3547cedd67da3bf8385d39d86af23227abbb1134.jpg@672w_378h_1c.webp", "duration": 234}, {"id": "BV15NnJ6PEKM", "title": "在玻璃栈道上跳广场舞？！命都不要了？共振现象很可能造成“桥毁人亡”！", "url": "https://www.bilibili.com/video/BV15NnJ6PEKM", "channel": "不刷题的吴姥姥", "channelUrl": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验", "cover": "https://i2.hdslb.com/bfs/archive/5456742806ffd79ed625bdbb48200bd88c48b4f5.jpg@672w_378h_1c.webp", "duration": 69}, {"id": "BV1L94M6pEnN", "title": "同样都滴水！空调和一级能效热水器的冷凝水，差别究竟在哪？", "url": "https://www.bilibili.com/video/BV1L94M6pEnN", "channel": "科学火箭叔", "channelUrl": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手", "cover": "https://i1.hdslb.com/bfs/archive/912e4bb2b855aa4c91b3892bc665ce0e01c01c84.jpg@672w_378h_1c.webp", "duration": 329}, {"id": "BV1Q84v6XEQk", "title": "香蕉也能操作手机？我们在科技馆做了个实验", "url": "https://www.bilibili.com/video/BV1Q84v6XEQk", "channel": "中国科学技术馆", "channelUrl": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频", "cover": "https://i1.hdslb.com/bfs/archive/c88620ef20e460ddcef1fa7ff1f78f0b0f39f44f.jpg@672w_378h_1c.webp", "duration": 608}, {"id": "BV1mpxX6tExK", "title": "揭秘天宫实验柜：为什么太空能合成地球造不出的材料？", "url": "https://www.bilibili.com/video/BV1mpxX6tExK", "channel": "中国科学技术馆", "channelUrl": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频", "cover": "https://i0.hdslb.com/bfs/archive/d594dc57e098cd4b96a7a996c88115ccf8bcb9dc.jpg@672w_378h_1c.webp", "duration": 307}, {"id": "BV1Hwp46KEC5", "title": "2026诺贝尔化学奖解读：分清左手右手竟能获诺奖？！", "url": "https://www.bilibili.com/video/BV1Hwp46KEC5", "channel": "上海科技馆官方账号", "channelUrl": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览", "cover": "https://i2.hdslb.com/bfs/archive/3b85c68ce71a8c8987c7f9ccf580bd42aa1a0a8c.jpg@672w_378h_1c.webp", "duration": 144}, {"id": "BV1a3YE6WE7F", "title": "当身体被大脑欺骗，揭秘VR大空间创作全流程！", "url": "https://www.bilibili.com/video/BV1a3YE6WE7F", "channel": "上海科技馆官方账号", "channelUrl": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览", "cover": "https://i1.hdslb.com/bfs/archive/30bd7543b7b9fa4b7e3e6991ae8854362c6f2893.jpg@672w_378h_1c.webp", "duration": 506}, {"id": "BV1VVhk6pEiR", "title": "【毕导】这个X你肯定见过，但它其实根本不存在", "url": "https://www.bilibili.com/video/BV1VVhk6pEiR", "channel": "毕导", "channelUrl": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大", "cover": "https://i2.hdslb.com/bfs/archive/bec8a99e1e614bf0860d85bc8100adc0b637a679.jpg@672w_378h_1c.webp", "duration": 903}, {"id": "BV12pnJ6DExY", "title": "可控核聚变，还要等50年吗？中国“人造太阳”走到哪了", "url": "https://www.bilibili.com/video/BV12pnJ6DExY", "channel": "妈咪说MommyTalk", "channelUrl": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解", "cover": "https://i2.hdslb.com/bfs/archive/fe992d0814a0632aa22de23f769d729dba6542e6.jpg@672w_378h_1c.webp", "duration": 977}, {"id": "BV1XzHk6wEdw", "title": "如何在冰里探测“幽灵粒子”？2026年物理学诺奖解读", "url": "https://www.bilibili.com/video/BV1XzHk6wEdw", "channel": "妈咪说MommyTalk", "channelUrl": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解", "cover": "https://i0.hdslb.com/bfs/archive/e4cf05d2f198924cb5cd155906aeb00d0256db2b.jpg@672w_378h_1c.webp", "duration": 740}, {"id": "BV1EW411p727", "title": "【官方双语】“π”=圆周率的由来：欧拉差点把“π”设置为6.283185了吗？", "url": "https://www.bilibili.com/video/BV1EW411p727", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 10, "caution": "", "reason": "六年级学圆正好看：π 这个符号和数值是怎么来的，6 分钟", "cover": "https://i1.hdslb.com/bfs/archive/2026cfb37ccff64de8f4c69b3c4d7a2056e88f27.jpg@672w_378h_1c.webp", "duration": 353}, {"id": "BV1znaf61EnS", "title": "【官方双语】AI 未能解决的最后一道IMO真题", "url": "https://www.bilibili.com/video/BV1znaf61EnS", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 12, "caution": "52 分钟、难度很高，适合数学拔尖、想挑战的孩子", "reason": "官方中文版，动画讲数学之美", "cover": "https://i2.hdslb.com/bfs/archive/6ede825d8a25d03a009ef28d0cee112ec1778e5f.jpg@672w_378h_1c.webp", "duration": 3116}, {"id": "BV1nc4J6tEqv", "title": "古代数学里的高考原题", "url": "https://www.bilibili.com/video/BV1nc4J6tEqv", "channel": "央视纪录", "channelUrl": "https://space.bilibili.com/72209046", "category": "数学", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等", "cover": "https://i0.hdslb.com/bfs/archive/476cede0430c3440562cd17c4dc26232b4462844.jpg@672w_378h_1c.webp", "duration": 144}, {"id": "BV1A34z6pERE", "title": "56乘78古人竟然能用竹棍算出来！", "url": "https://www.bilibili.com/video/BV1A34z6pERE", "channel": "央视纪录", "channelUrl": "https://space.bilibili.com/72209046", "category": "数学", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等", "cover": "https://i1.hdslb.com/bfs/archive/26e62a7ba2074b429bbb097cd00824e39b982eff.jpg@672w_378h_1c.webp", "duration": 89}, {"id": "BV1nb4e6vEPK", "title": "精品文物簿｜独具匠心的四羊方尊", "url": "https://www.bilibili.com/video/BV1nb4e6vEPK", "channel": "国家博物馆", "channelUrl": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片", "cover": "https://i2.hdslb.com/bfs/archive/ba184c48c829b035b52def32a9f3cb53de719673.jpg@672w_378h_1c.webp", "duration": 150}, {"id": "BV1thxP6ZEWp", "title": "精品文物簿｜玉人：窥见殷商面容", "url": "https://www.bilibili.com/video/BV1thxP6ZEWp", "channel": "国家博物馆", "channelUrl": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片", "cover": "https://i2.hdslb.com/bfs/archive/a322f8174f355f4f1857aff41d444c0c92d54b9d.jpg@672w_378h_1c.webp", "duration": 117}, {"id": "BV1XFx56fE3M", "title": "错金银云纹犀牛尊，195件国宝番外篇", "url": "https://www.bilibili.com/video/BV1XFx56fE3M", "channel": "讲解员河森堡", "channelUrl": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史", "cover": "https://i1.hdslb.com/bfs/archive/fab0fc467633560cb8adb4b3cea3a140fcc38707.jpg@672w_378h_1c.webp", "duration": 579}, {"id": "BV1fV411x72a", "title": "【自制】我把自行车做成了 自 动 驾 驶 ！！【硬核】", "url": "https://www.bilibili.com/video/BV1fV411x72a", "channel": "稚晖君", "channelUrl": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深，看个热闹也值", "reason": "经典作品：自己设计电路、写程序，让自行车自己平衡、自己走，和 AI 课连着看", "cover": "https://i2.hdslb.com/bfs/archive/ffc49d25827443f438d86de3a4fb41dc259cc142.jpg@672w_378h_1c.webp", "duration": 667}, {"id": "BV12341117rG", "title": "【自制】我造了一台钢铁侠的迷你机械臂 ！【硬核】", "url": "https://www.bilibili.com/video/BV12341117rG", "channel": "稚晖君", "channelUrl": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深，看个热闹也值", "reason": "经典作品：从零设计一台 6 轴机械臂，看工程师怎么把想法变成实物", "cover": "https://i0.hdslb.com/bfs/archive/5136993f2b338e5a936ba6bb649237a476a083c1.jpg@672w_378h_1c.webp", "duration": 965, "parts": 2}, {"id": "BV1Ljtt6VEAS", "title": "弄了口大钢牙", "url": "https://www.bilibili.com/video/BV1Ljtt6VEAS", "channel": "手工耿", "channelUrl": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手", "cover": "https://i1.hdslb.com/bfs/archive/bc81ae96a92e3d2c16c3f5156e0a416e4f65b2c8.jpg@672w_378h_1c.webp", "duration": 162}, {"id": "BV1KbxC6YE7F", "title": "在沃尔玛随手买的 4 个玩具，拆开全是物理黑科技", "url": "https://www.bilibili.com/video/BV1KbxC6YE7F?p=2", "channel": "MarkRober官方", "channelUrl": "https://space.bilibili.com/3546769141008790", "category": "科学实验", "minAge": 10, "caution": "默认播中文配音（第 2P）", "reason": "2 分钟拆玩具：超市里的普通玩具藏着哪些物理原理", "page": 2, "cover": "https://i2.hdslb.com/bfs/archive/04a21bf5c072968e26629d1a9dce95ad8754093d.jpg@672w_378h_1c.webp", "duration": 119, "parts": 2}, {"id": "BV1wi421f71U", "title": "为什么制作蓝LED几乎是不可能的", "url": "https://www.bilibili.com/video/BV1wi421f71U", "channel": "Veritasium真理元素", "channelUrl": "https://space.bilibili.com/94742590", "category": "科学实验", "minAge": 11, "caution": "32 分钟，后半段讲半导体材料偏难，听个大概就行", "reason": "一个工程师坚持了好几年，把大家都说做不出来的蓝 LED 做了出来", "cover": "https://i2.hdslb.com/bfs/archive/367685c5454b548a6da12352ac7354fb010935ef.jpg@672w_378h_1c.webp", "duration": 1937}, {"id": "BV1xdZJYJE1x", "title": "经典概率论问题“三门问题”：如何才能获得更大中奖率？", "url": "https://www.bilibili.com/video/BV1xdZJYJE1x", "channel": "李永乐老师官方", "channelUrl": "https://space.bilibili.com/9458053", "category": "数学", "minAge": 10, "caution": "", "reason": "4 分钟讲三门问题：概率第一课，直觉有时会骗人", "cover": "https://i2.hdslb.com/bfs/archive/387de3f796cbf33041de8130bc1d39d5066b8acb.jpg@672w_378h_1c.webp", "duration": 242}, {"id": "BV1Zu4y1W7dm", "title": "一些反直觉概率的计算机模拟", "url": "https://www.bilibili.com/video/BV1Zu4y1W7dm", "channel": "Ele实验室", "channelUrl": "https://space.bilibili.com/481434238", "category": "数学", "minAge": 11, "caution": "有一些代码画面，看不懂代码不影响理解", "reason": "用程序把概率题模拟上万次来验证答案：用实验检验想法，AI 研究就是这么做的", "cover": "https://i0.hdslb.com/bfs/archive/65d3b572cb1252e965578ce0d752ae5061377220.jpg@672w_378h_1c.webp", "duration": 747}, {"id": "BV1smxM6YEXW", "title": "靠统计学横扫桌游？井字棋到大富翁全破解", "url": "https://www.bilibili.com/video/BV1smxM6YEXW?p=2", "channel": "MarkRober官方", "channelUrl": "https://space.bilibili.com/3546769141008790", "category": "数学", "minAge": 10, "caution": "29 分钟；默认播中文配音（第 2P）", "reason": "用统计和模拟找桌游的必胜策略，从井字棋讲到大富翁", "page": 2, "cover": "https://i2.hdslb.com/bfs/archive/e7bd81de1eac350b5d79b39a6efd6837abd977bc.jpg@672w_378h_1c.webp", "duration": 1734, "parts": 2}, {"id": "BV1EW411u7th", "title": "【计算机科学速成课】[40集全/精校] - Crash Course Computer Science", "url": "https://www.bilibili.com/video/BV1EW411u7th", "channel": "CrashCourse字幕组", "channelUrl": "https://space.bilibili.com/290704043", "category": "计算机编程", "minAge": 11, "caution": "字幕组译制的 40 集合集，站内默认第 1 集，其余集数点「高清看」到 B 站选集", "reason": "系统课 · 每集约 12 分钟，从早期计算机讲到 CPU、编程语言、互联网和 AI", "cover": "https://i2.hdslb.com/bfs/archive/3d37686d1cb53309504f5f35955257a44b4e28fb.jpg@672w_378h_1c.webp", "duration": 713, "parts": 40}, {"id": "BV1wi4y157D3", "title": "从0到1设计一台计算机", "url": "https://www.bilibili.com/video/BV1wi4y157D3", "channel": "Ele实验室", "channelUrl": "https://space.bilibili.com/481434238", "category": "计算机编程", "minAge": 12, "caution": "21 集、偏硬核，建议先看完速成课前 10 集", "reason": "从 0 和 1 开始，一步步「搭」出一台计算机，用动画讲 CPU 是怎么算的", "cover": "https://i0.hdslb.com/bfs/archive/daef9e0e37ea2d4a4ec81d05a2ac0c2722d47b54.jpg@672w_378h_1c.webp", "duration": 176, "parts": 21}, {"id": "BV12J411X7tY", "title": "少儿编程scratch3.0基础入门（大龙老师）", "url": "https://www.bilibili.com/video/BV12J411X7tY", "channel": "大龙编程", "channelUrl": "https://space.bilibili.com/483467992", "category": "计算机编程", "minAge": 9, "caution": "简介和评论区置顶在推销付费系统课；免费的这 15 集就够入门，不用买", "reason": "15 集跟着做：拖积木写出会动的小游戏，零基础学编程的第一步", "cover": "https://i2.hdslb.com/bfs/archive/45a0b5a218de8fff3b7f4cf02e130179b1be470c.jpg@672w_378h_1c.webp", "duration": 532, "parts": 15}, {"id": "BV1fFyJBFE92", "title": "【全集】哈佛大学CS50 Python编程 中英字幕 课程附完整课件", "url": "https://www.bilibili.com/video/BV1fFyJBFE92", "channel": "码农的洋墨水", "channelUrl": "https://space.bilibili.com/542307689", "category": "计算机编程", "minAge": 12, "caution": "转载的哈佛公开课，英文授课配中英字幕，每讲 1 小时以上；转载可能失效", "reason": "Scratch 玩熟了就换 Python：深度学习用的就是 Python，这门哈佛公开课从零讲起", "cover": "https://i0.hdslb.com/bfs/archive/7442f7b6303a1c6d5c9c3babf14b3e9ed17c8272.jpg@672w_378h_1c.webp", "duration": 257, "parts": 11}, {"id": "BV1atCRYsE7x", "title": "90分钟！清华博士带你一口气搞懂人工智能和神经网络", "url": "https://www.bilibili.com/video/BV1atCRYsE7x", "channel": "漫士沉思录", "channelUrl": "https://space.bilibili.com/266765166", "category": "AI 进阶", "minAge": 12, "caution": "90 分钟，建议分三次看；有些数学，看不懂的地方先跳过", "reason": "清华博士用动画一口气讲清人工智能和神经网络，看完对深度学习有全景印象", "cover": "https://i2.hdslb.com/bfs/archive/3fe4d87db7573fc74c8a39bd3a75f6660c1194ea.jpg@672w_378h_1c.webp", "duration": 5338}, {"id": "BV1Ux411j7ri", "title": "【官方双语】深度学习之梯度下降法 Part 2 ver 0.9 beta", "url": "https://www.bilibili.com/video/BV1Ux411j7ri", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 进阶", "minAge": 12, "caution": "2017 年的老视频，画质一般；有些数学", "reason": "神经网络第 2 集：网络是怎么一点点「学会」的（梯度下降）", "cover": "https://i2.hdslb.com/bfs/archive/7db6e4ecbe249b369dca33211383303bef33f477.jpg@672w_378h_1c.webp", "duration": 1261}, {"id": "BV16x411V7Qg", "title": "【官方双语】深度学习之反向传播算法 上/下 Part 3 ver 0.9 beta", "url": "https://www.bilibili.com/video/BV16x411V7Qg", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 进阶", "minAge": 13, "caution": "分上下两篇，下篇是微积分，看懂上篇就够", "reason": "神经网络第 3 集：反向传播，网络怎么知道该改哪里", "cover": "https://i1.hdslb.com/bfs/archive/c617e8ce539c6dfb96fb89e7d2feec919b609b5d.jpg@672w_378h_1c.webp", "duration": 834, "parts": 2}, {"id": "BV1ys411472E", "title": "【官方双语/合集】线性代数的本质 - 系列合集", "url": "https://www.bilibili.com/video/BV1ys411472E", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 13, "caution": "16 集合集，站内默认第 1 集（序言），其余集数点「高清看」到 B 站选集", "reason": "深度学习的数学地基：用动画看懂向量和矩阵", "cover": "https://i2.hdslb.com/bfs/archive/c81a8eb032f3eaa1afd604272a410ac6896f281e.jpg@672w_378h_1c.webp", "duration": 309, "parts": 16}, {"id": "BV1R7411a76r", "title": "【官方双语】贝叶斯定理，使概率论直觉化", "url": "https://www.bilibili.com/video/BV1R7411a76r", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 12, "caution": "需要分数和比例的基础", "reason": "贝叶斯定理：看到新证据后怎么更新判断，AI 和科学家都靠它", "cover": "https://i1.hdslb.com/bfs/archive/84119b1a13fba655cf491c13cd05475b58d9499f.jpg@672w_378h_1c.webp", "duration": 946}, {"id": "BV1Vd4y1e7pj", "title": "【官方双语】那么……什么是卷积？", "url": "https://www.bilibili.com/video/BV1Vd4y1e7pj", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 进阶", "minAge": 13, "caution": "后半段讲快速傅里叶变换，偏难", "reason": "卷积：AI 看图片时用的核心运算，从掷骰子讲到图片模糊", "cover": "https://i1.hdslb.com/bfs/archive/739f7c8c75a4012fe70c10b47f8c5fb53e78ab44.jpg@672w_378h_1c.webp", "duration": 1382}, {"id": "BV13z421U7cs", "title": "【官方双语】GPT是什么？直观解释Transformer | 深度学习第5章", "url": "https://www.bilibili.com/video/BV13z421U7cs", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 进阶", "minAge": 13, "caution": "27 分钟，有向量和矩阵", "reason": "GPT 到底是什么：大模型怎么把词变成数字，再预测下一个词", "cover": "https://i0.hdslb.com/bfs/archive/f2b59e2ba81081f22640102d542b01a8bb0c41f0.jpg@672w_378h_1c.webp", "duration": 1634}, {"id": "BV1TZ421j7Ke", "title": "【官方双语】直观解释注意力机制，Transformer的核心 | 【深度学习第6章】", "url": "https://www.bilibili.com/video/BV1TZ421j7Ke", "channel": "3Blue1Brown", "channelUrl": "https://space.bilibili.com/88461692", "category": "AI 进阶", "minAge": 13, "caution": "26 分钟，接着 GPT 那一集看", "reason": "注意力机制：大模型怎么理解一个词在句子里的意思", "cover": "https://i1.hdslb.com/bfs/archive/407cdaf692b36679f8820713f574c62ca293279b.jpg@672w_378h_1c.webp", "duration": 1570}, {"id": "BV1oX4y137bC", "title": "01 课程安排【动手学深度学习v2】", "url": "https://www.bilibili.com/video/BV1oX4y137bC", "channel": "跟李沐学AI", "channelUrl": "https://space.bilibili.com/1567748478", "category": "AI 进阶", "minAge": 14, "caution": "这是给大学生和工程师的课，要先会 Python、学过一点线性代数", "reason": "终点站：亚马逊首席科学家李沐的《动手学深度学习》，边讲边写代码", "cover": "https://i1.hdslb.com/bfs/archive/9e961a19a4bdb8206671808d219503afd9eb4c01.jpg@672w_378h_1c.webp", "duration": 488}], "channels": [{"name": "李永乐老师官方", "url": "https://space.bilibili.com/9458053", "category": "科学实验", "minAge": 10, "caution": "有时谈社会/经济话题，可跳过", "reason": "中学老师板书讲物理数学，逻辑清楚", "hasVideos": true}, {"name": "Spectator-YYX", "url": "https://space.bilibili.com/171219028", "category": "AI 入门", "minAge": 10, "caution": "个人译制", "reason": "TED-Ed 动画中英字幕", "hasVideos": true}, {"name": "煎蛋脑袋", "url": "https://space.bilibili.com/9912517", "category": "AI 入门", "minAge": 10, "caution": "转载", "reason": "TED-Ed 动画中文字幕", "hasVideos": true}, {"name": "3Blue1Brown", "url": "https://space.bilibili.com/88461692", "category": "数学", "minAge": 11, "caution": "偏难，适合拔尖孩子", "reason": "官方中文版，动画讲数学之美", "hasVideos": true}, {"name": "子牧说", "url": "https://space.bilibili.com/76991025", "category": "AI 入门", "minAge": 11, "caution": "2023 年内容", "reason": "AI 绘画原理入门", "hasVideos": true}, {"name": "中国食品报融媒体", "url": "https://space.bilibili.com/439478093", "category": "AI 入门", "minAge": 10, "caution": "", "reason": "辟谣类内容，培养对 AI 生成内容的判断力", "hasVideos": true}, {"name": "喜欢喵喵叫的小猫咪", "url": "https://space.bilibili.com/23279213", "category": "AI 入门", "minAge": 10, "caution": "转载，可能失效", "reason": "AlphaGo 纪录片", "hasVideos": true}, {"name": "机器树的杂货铺", "url": "https://space.bilibili.com/392397276", "category": "AI 入门", "minAge": 11, "caution": "转载，可能失效", "reason": "Crash Course AI 中英双语", "hasVideos": true}, {"name": "复利的奇迹价值投资", "url": "https://space.bilibili.com/383587023", "category": "AI 入门", "minAge": 11, "caution": "转载，可能失效", "reason": "央视纪录片《智能时代》", "hasVideos": true}, {"name": "漫士沉思录", "url": "https://space.bilibili.com/266765166", "category": "AI 入门", "minAge": 11, "caution": "视频较长、偏谈话", "reason": "数学与思维科普", "hasVideos": true}, {"name": "无穷小亮的科普日常", "url": "https://space.bilibili.com/14804670", "category": "自然动物", "minAge": 8, "caution": "个别期有寄生虫/尸体标本画面，低年级家长陪看", "reason": "国家动物博物馆科普人，鉴定网络奇葩生物，讲得好笑又严谨", "hasVideos": true}, {"name": "江氏小盗龙", "url": "https://space.bilibili.com/10613291", "category": "自然动物", "minAge": 8, "caution": "单条很短", "reason": "古生物科普 UP 主，恐龙知识短小精炼", "hasVideos": true}, {"name": "芳斯塔芙", "url": "https://space.bilibili.com/72270557", "category": "自然动物", "minAge": 10, "caution": "偶有猎奇、血腥标题或鬼畜梗，家长先挑", "reason": "古生物/演化史讲得系统有趣", "hasVideos": true}, {"name": "我是不白吃", "url": "https://space.bilibili.com/451296298", "category": "自然动物", "minAge": 8, "caution": "有商单，偶尔讲野味/危险食材", "reason": "动画讲食物来历与历史，小孩爱看", "hasVideos": true}, {"name": "中国国家地理", "url": "https://space.bilibili.com/2000819931", "category": "地理天文", "minAge": 8, "caution": "部分为商务合作视频", "reason": "官方杂志号，地理地貌与自然影像", "hasVideos": true}, {"name": "星球研究所", "url": "https://space.bilibili.com/326427334", "category": "地理天文", "minAge": 10, "caution": "偶有灾难救援类沉重题材", "reason": "《这里是中国》团队，壮美中国地理", "hasVideos": true}, {"name": "二次元的中科院物理所", "url": "https://space.bilibili.com/407045223", "category": "科学实验", "minAge": 8, "caution": "部分内容偏深", "reason": "中科院物理所官方，实验+前沿", "hasVideos": true}, {"name": "不刷题的吴姥姥", "url": "https://space.bilibili.com/395877542", "category": "科学实验", "minAge": 8, "caution": "无明显问题", "reason": "清华物理教授吴姥姥做趣味实验", "hasVideos": true}, {"name": "科学火箭叔", "url": "https://space.bilibili.com/554729147", "category": "科学实验", "minAge": 8, "caution": "有节目推广", "reason": "趣味科学+创客动手", "hasVideos": true}, {"name": "中国科学技术馆", "url": "https://space.bilibili.com/624897864", "category": "科学实验", "minAge": 8, "caution": "粉丝不多，更新不稳", "reason": "官方科技馆，实验短视频", "hasVideos": true}, {"name": "上海科技馆官方账号", "url": "https://space.bilibili.com/624896587", "category": "科学实验", "minAge": 8, "caution": "内容量较少", "reason": "官方科技馆，诺奖解读、展览", "hasVideos": true}, {"name": "毕导", "url": "https://space.bilibili.com/254463269", "category": "科学实验", "minAge": 11, "caution": "有成人向玩梗和商单，建议高年级", "reason": "清华博士化学/生活科学，脑洞大", "hasVideos": true}, {"name": "妈咪说MommyTalk", "url": "https://space.bilibili.com/223146252", "category": "科学实验", "minAge": 11, "caution": "内容偏难，适合爱科学的高年级", "reason": "物理/航天前沿讲解", "hasVideos": true}, {"name": "央视纪录", "url": "https://space.bilibili.com/72209046", "category": "历史文博", "minAge": 8, "caution": "偶有战争/罪案纪录片，家长挑选", "reason": "CCTV纪录片官方，含古代数学等", "hasVideos": true}, {"name": "国家博物馆", "url": "https://space.bilibili.com/668633019", "category": "历史文博", "minAge": 8, "caution": "无", "reason": "国博官方，文物精品小短片", "hasVideos": true}, {"name": "讲解员河森堡", "url": "https://space.bilibili.com/483884702", "category": "历史文博", "minAge": 10, "caution": "部分谈辟谣/争议历史，偏成人", "reason": "国博讲解员讲文物与人类史", "hasVideos": true}, {"name": "稚晖君", "url": "https://space.bilibili.com/20259914", "category": "动手创造", "minAge": 11, "caution": "节奏快、技术深", "reason": "硬核机器人DIY，激发工程梦", "hasVideos": true}, {"name": "手工耿", "url": "https://space.bilibili.com/280793434", "category": "动手创造", "minAge": 8, "caution": "有电焊/刀具画面，提醒勿模仿；偶有带货", "reason": "无用但有趣的焊接发明，激发动手", "hasVideos": true}, {"name": "凡人修仙传", "url": "https://www.bilibili.com/bangumi/media/md28223043", "category": "动漫", "minAge": 12, "caution": "杀戮、斗法及残酷生存主题，家长陪看", "reason": "修仙成长故事，讨论选择与代价", "hasVideos": false}, {"name": "刺客伍六七（伍六七）", "url": "https://www.bilibili.com/bangumi/media/md6360", "category": "动漫", "minAge": 12, "caution": "刺杀、打斗、流血及成人笑话，家长陪看", "reason": "小岛武侠喜剧，讲善意与成长", "hasVideos": false}, {"name": "中国奇谭", "url": "https://www.bilibili.com/bangumi/media/md28235401", "category": "动漫", "minAge": 10, "caution": "《鹅鹅鹅》等诡异，《林林》等涉及死亡，家长选集", "reason": "中式短篇与多样画风，打开想象力", "hasVideos": false}, {"name": "雾山五行", "url": "https://www.bilibili.com/bangumi/media/md28228714", "category": "动漫", "minAge": 12, "caution": "高强度战斗、血腥及妖怪画面，家长陪看", "reason": "欣赏水墨美术和动作设计", "hasVideos": false}, {"name": "MarkRober官方", "url": "https://space.bilibili.com/3546769141008790", "category": "科学实验", "minAge": 10, "caution": "默认播中文配音", "reason": "前 NASA 工程师，用工程和实验回答好玩的问题", "hasVideos": true}, {"name": "Veritasium真理元素", "url": "https://space.bilibili.com/94742590", "category": "科学实验", "minAge": 11, "caution": "部分视频偏长偏深", "reason": "Veritasium 官方中文频道，科学史和实验", "hasVideos": true}, {"name": "Ele实验室", "url": "https://space.bilibili.com/481434238", "category": "计算机编程", "minAge": 11, "caution": "部分视频偏技术", "reason": "用动画讲计算机原理", "hasVideos": true}, {"name": "CrashCourse字幕组", "url": "https://space.bilibili.com/290704043", "category": "计算机编程", "minAge": 11, "caution": "字幕组译制", "reason": "Crash Course 速成课中文字幕", "hasVideos": true}, {"name": "大龙编程", "url": "https://space.bilibili.com/483467992", "category": "计算机编程", "minAge": 9, "caution": "会推销付费课，免费入门课就够", "reason": "少儿 Scratch 编程入门", "hasVideos": true}, {"name": "码农的洋墨水", "url": "https://space.bilibili.com/542307689", "category": "计算机编程", "minAge": 12, "caution": "转载", "reason": "哈佛 CS50 Python 课程中英字幕", "hasVideos": true}, {"name": "跟李沐学AI", "url": "https://space.bilibili.com/1567748478", "category": "AI 进阶", "minAge": 14, "caution": "大学和工程师水平", "reason": "李沐《动手学深度学习》", "hasVideos": true}], "categories": ["AI 入门", "AI 进阶", "计算机编程", "自然动物", "地理天文", "科学实验", "数学", "历史文博", "动手创造"], "built": "2026-11-10", "path": {"title": "从零到深度学习", "intro": "给五六年级起步、将来想做 AI 的孩子排的路线。前面打科学和数学底子，中间学计算机和编程，后面一步步走进神经网络。按顺序看，看完一条点「看完了」。", "tips": ["每周 3～4 次、每次 20～30 分钟，比周末一口气刷效果好。", "第 3、4 阶段要边看边动手：看完就打开 Scratch 做一个。", "看不懂很正常。先留个印象，过一两年再回来看，会突然懂。", "视频只是引子：数学课学扎实、多问为什么、多动手，比看多少视频都重要。"], "stages": [{"name": "像科学家一样好奇", "age": "10 岁+ · 现在就能看", "goal": "先爱上「为什么」。科学家和 AI 研究员每天做的事，就是提出问题、做实验、从失败里学。", "items": [{"id": "BV1KbxC6YE7F", "note": "热身：拆开超市里的玩具，科学就在身边"}, {"id": "BV15NnJ6PEKM", "note": "清华教授做实验：为什么不能在玻璃栈道上齐步跳"}, {"id": "BV1BA4662EfB", "note": "科学家从蚊子嘴里找灵感做针头"}, {"id": "BV1wi421f71U", "note": "科学家怎么面对失败：蓝 LED 的故事（32 分钟，周末看）"}]}, {"name": "数学是 AI 的语言", "age": "10 岁+", "goal": "AI 的本质是数学。先建立数感和概率直觉，不用急着学公式。", "items": [{"id": "BV1EW411p727", "note": "数学符号也是人发明的：π 的故事"}, {"id": "BV1xdZJYJE1x", "note": "概率第一课：直觉会骗人"}, {"id": "BV1Zu4y1W7dm", "note": "用程序做实验验证概率，这就是 AI 研究的日常"}, {"id": "BV1smxM6YEXW", "note": "用统计找桌游必胜法，和 AlphaGo 下棋是同一类思路"}, {"id": "BV17C4P6CE5f", "note": "家长陪看：AI 什么都会了，为什么还要学数学"}]}, {"name": "计算机是怎么工作的", "age": "11 岁+", "goal": "弄明白 0 和 1 怎么变成游戏、视频和 AI。速成课每周看 2～3 集。", "items": [{"id": "BV1EW411u7th", "note": "Crash Course 计算机科学 40 集，每周 2～3 集"}, {"id": "BV1wi4y157D3", "note": "看完速成课前 10 集再来：亲手「搭」一台计算机"}]}, {"name": "自己动手：编程和造东西", "age": "10 岁+ · 和第 3 阶段同时进行", "goal": "光看不练学不会。先用 Scratch 做小游戏，熟了换 Python，深度学习用的就是 Python。", "items": [{"id": "BV12J411X7tY", "note": "跟着做：拖积木写出第一个小游戏"}, {"id": "BV1fV411x72a", "note": "看工程师把电路、编程和控制算法装进一辆自行车"}, {"id": "BV12341117rG", "note": "从零造一台机械臂"}, {"id": "BV1fFyJBFE92", "note": "Scratch 熟了就上 Python（哈佛公开课，12 岁+）"}]}, {"name": "AI 是什么", "age": "10 岁+", "goal": "按顺序看完第 1～5 课，再学会「不全信 AI」。", "items": [{"id": "BV1SH4y1A7DA", "note": "第 1 课 · AI 是什么"}, {"id": "BV14p4y1h7zX", "note": "第 2 课 · AI 怎么学"}, {"id": "BV1Ei4y1b7Ci", "note": "第 3 课 · 机器能思考吗"}, {"id": "BV1xmA2eMEFF", "note": "第 4 课 · ChatGPT 怎么说话"}, {"id": "BV1nc411p7D9", "note": "第 5 课 · AI 怎么画画"}, {"id": "BV1S2xW6JECi", "note": "AI 素养 · 学会不全信 AI"}, {"id": "BV1Ct411u71n", "note": "故事 · AlphaGo 纪录片（90 分钟，可分两次看）"}, {"id": "BV1P7411r7Dw", "note": "系统课 · Crash Course AI 21 集"}]}, {"name": "神经网络怎么学习", "age": "12 岁+ · 小学毕业前后", "goal": "第一次看到深度学习的内部。看不懂的数学先跳过，留个印象就好。", "items": [{"id": "BV1atCRYsE7x", "note": "先看漫士的 90 分钟全景，分三次看"}, {"id": "BV1bx411M7Zx", "note": "3Blue1Brown 第 1 集：神经网络长什么样"}, {"id": "BV1Ux411j7ri", "note": "第 2 集：梯度下降，网络怎么学"}, {"id": "BV16x411V7Qg", "note": "第 3 集：反向传播（看懂上篇就够）"}]}, {"name": "初中以后：真正的深度学习", "age": "13 岁+", "goal": "学过方程和函数再回来。线性代数是地基，最后跟着李沐边看边写代码。", "items": [{"id": "BV1ys411472E", "note": "线性代数的本质（16 集）"}, {"id": "BV1R7411a76r", "note": "贝叶斯定理：用证据更新判断"}, {"id": "BV1Vd4y1e7pj", "note": "卷积：AI 怎么看图片"}, {"id": "BV13z421U7cs", "note": "GPT 是什么"}, {"id": "BV1TZ421j7Ke", "note": "注意力机制"}, {"id": "BV1oX4y137bC", "note": "终点站：李沐《动手学深度学习》（14 岁+，先会 Python）"}]}]}, "tiers": [{"tier": "S", "label": "杰作", "items": [{"name": "稚晖君", "mid": 20259914, "what": "硬核自制硬件和机器人（自动驾驶自行车、机械臂）。现在创业做机器人，更新少，但每期都是大工程", "like": "Stuff Made Here、Dan Gelbart", "fans": "283.4 万", "videos": 54, "kid": "go", "note": ""}, {"name": "阿木爷爷", "mid": 29373131, "what": "老木匠，不用钉子不用胶，榫卯做鲁班凳、拱桥。几乎不说话，看手艺", "like": "Clickspring、Kiwami Japan", "fans": "52 万", "videos": 304, "kid": "go", "note": ""}, {"name": "李子柒", "mid": 19577966, "what": "从原料做起的传统手艺和食物（漆器、蜀绣、文房四宝）", "like": "Primitive Technology、How To Make Everything", "fans": "1025.4 万", "videos": 145, "kid": "go", "note": ""}, {"name": "老师好我叫何同学", "mid": 163637592, "what": "科技话题加电影级的制作和巧思", "like": "Captain Disillusion（制作水准）", "fans": "1306 万", "videos": 117, "kid": "go", "note": ""}]}, {"tier": "A", "label": "开眼界，旧视频值得一口气补完", "items": [{"name": "毕导", "mid": 254463269, "what": "清华化工博士，用理工科的较真劲儿搞笑地讲科学", "like": "Steve Mould", "fans": "844.4 万", "videos": 175, "kid": "go", "note": "有成人向玩梗，高年级更合适"}, {"name": "二次元的中科院物理所", "mid": 407045223, "what": "中科院物理所官方号：物理实验、科学问答", "like": "NightHawkInLight、The Action Lab", "fans": "247.1 万", "videos": 1206, "kid": "go", "note": ""}, {"name": "林亦LYi", "mid": 4401694, "what": "AI 工程师，亲手做实验讲科技话题", "like": "Breaking Taps、AlphaPhoenix", "fans": "140.6 万", "videos": 241, "kid": "pick", "note": "近期多聊 AI 行业和社会话题，偏大人"}, {"name": "漫士沉思录", "mid": 266765166, "what": "数学和科学思想，动画讲解", "like": "3Blue1Brown、2swap", "fans": "154.9 万", "videos": 149, "kid": "interest", "note": "适合数学好的孩子"}, {"name": "芳斯塔芙", "mid": 72270557, "what": "生物学博士，讲演化和古生物的故事", "like": "TierZoo、Real Science", "fans": "501.2 万", "videos": 272, "kid": "go", "note": "偶有猎奇标题"}, {"name": "无穷小亮的科普日常", "mid": 14804670, "what": "鉴定网上的热门生物，讲动物冷知识", "like": "TierZoo", "fans": "1078 万", "videos": 464, "kid": "go", "note": ""}, {"name": "才疏学浅的才浅", "mid": 2200736, "what": "极致手工：复刻凤冠、首饰、文物", "like": "Kiwami Japan", "fans": "503.5 万", "videos": 101, "kid": "go", "note": ""}, {"name": "手工耿", "mid": 280793434, "what": "焊接打造各种「无用发明」", "like": "Simone Giertz、Michael Reeves、colinfurze", "fans": "807.9 万", "videos": 233, "kid": "go", "note": "有电焊、切割画面，别模仿"}, {"name": "星球研究所", "mid": 326427334, "what": "中国地理和风景，讲一个地方是怎么形成的", "like": "Map Men", "fans": "581.2 万", "videos": 212, "kid": "go", "note": ""}, {"name": "硬件茶谈", "mid": 14871346, "what": "芯片和硬件产业的来龙去脉", "like": "Asianometry", "fans": "398.9 万", "videos": 341, "kid": "later", "note": ""}]}, {"tier": "B", "label": "基本每期都好", "items": [{"name": "李永乐老师官方", "mid": 9458053, "what": "白板讲物理、数学，以及时事里的科学", "like": "minutephysics", "fans": "348.8 万", "videos": 653, "kid": "go", "note": ""}, {"name": "妈咪说MommyTalk", "mid": 223146252, "what": "物理和宇宙话题科普", "like": "minutephysics", "fans": "64.2 万", "videos": 316, "kid": "interest", "note": "偏难，适合爱物理的孩子"}, {"name": "Ele实验室", "mid": 481434238, "what": "用动画讲计算机原理", "like": "Real Engineering（计算机版）", "fans": "59.4 万", "videos": 65, "kid": "interest", "note": "适合喜欢电脑的孩子"}, {"name": "柴知道", "mid": 26798384, "what": "动画科普，讲各种「为什么」", "like": "Real Engineering、Half as Interesting", "fans": "163.6 万", "videos": 514, "kid": "go", "note": ""}, {"name": "老石谈芯", "mid": 612932327, "what": "芯片工程师出身，讲芯片原理和产业", "like": "Asianometry、Sam Zeloof", "fans": "56.9 万", "videos": 204, "kid": "later", "note": ""}, {"name": "工科男孙老师", "mid": 43584648, "what": "拆解和测试各种产品", "like": "Munro Live", "fans": "70.8 万", "videos": 166, "kid": "interest", "note": ""}, {"name": "小约翰可汗", "mid": 23947287, "what": "用幽默讲近现代各国的历史（「奇葩小国」系列）", "like": "Historia Civilis", "fans": "1096.1 万", "videos": 267, "kid": "pick", "note": "讲战争、政变、独裁者，黑色幽默，初中再看更好"}, {"name": "地球知识局", "mid": 100785033, "what": "地理和国际话题，用地图图解", "like": "Map Men、Half as Interesting", "fans": "263.7 万", "videos": 161, "kid": "pick", "note": "有不少地缘政治话题"}, {"name": "余铁匠打铁日常", "mid": 414367068, "what": "陕西老铁匠，打农具，用古法夹钢锻打", "like": "Alec Steele", "fans": "44.3 万", "videos": 136, "kid": "interest", "note": ""}, {"name": "滇西小哥", "mid": 101229184, "what": "云南乡村的美食和生活", "like": "How To Make Everything", "fans": "169.8 万", "videos": 529, "kid": "interest", "note": ""}, {"name": "中科院格致论道", "mid": 447261734, "what": "科学家演讲", "like": "Strange Loop（演讲）", "fans": "83.1 万", "videos": 878, "kid": "interest", "note": "部分偏深"}, {"name": "跟李沐学AI", "mid": 1567748478, "what": "逐篇精读 AI 经典论文，《动手学深度学习》课程", "like": "Two Minute Papers（深度版）", "fans": "118.7 万", "videos": 189, "kid": "later", "note": ""}]}, {"tier": "C", "label": "很多好片，不是每期都惊艳", "items": [{"name": "极客湾Geekerwan", "mid": 25876945, "what": "芯片、手机、电脑的深度评测", "like": "Asianometry、Ben Vallack", "fans": "567.6 万", "videos": 642, "kid": "later", "note": ""}, {"name": "影视飓风", "mid": 946974, "what": "拍摄器材、影像技术和幕后", "like": "Daniel Schiffer", "fans": "1895.5 万", "videos": 937, "kid": "interest", "note": ""}, {"name": "Mr迷瞪", "mid": 304578055, "what": "用身边材料做小发明、搞改造", "like": "DIY Perks、I did a thing", "fans": "259.3 万", "videos": 605, "kid": "pick", "note": "商单多"}, {"name": "天体物理博士刘博洋", "mid": 437204674, "what": "天文和天体物理科普", "like": "Scott Manley", "fans": "23.9 万", "videos": 188, "kid": "interest", "note": ""}, {"name": "马同学图解数学", "mid": 355876061, "what": "用图解讲数学概念", "like": "3Blue1Brown", "fans": "16.6 万", "videos": 106, "kid": "later", "note": "讲的是大学数学（微积分、线代、概率论）"}, {"name": "我是不白吃", "mid": 451296298, "what": "用动画讲食物的历史", "like": "Half as Interesting", "fans": "212.5 万", "videos": 1387, "kid": "go", "note": "有商单"}, {"name": "CNSA中国航天文化", "mid": 496261881, "what": "国家航天局新闻中心的官方号：发射和航天科普", "like": "Everyday Astronaut", "fans": "123.6 万", "videos": 1186, "kid": "go", "note": ""}, {"name": "央视纪录", "mid": 72209046, "what": "央视纪录频道官方号：大工程、自然纪录片", "like": "BuildWitt、Practical Engineering", "fans": "182.7 万", "videos": 6265, "kid": "interest", "note": "内容很杂，要挑片"}, {"name": "美食作家王刚R", "mid": 290526283, "what": "正经教做菜，全是干货", "like": "You Suck At Cooking（教学那一面）", "fans": "677.9 万", "videos": 909, "kid": "interest", "note": "可以跟家长一起做"}, {"name": "老饭骨", "mid": 419872064, "what": "老厨师教家常菜和宫廷菜", "like": "The Taste Emporium", "fans": "538.9 万", "videos": 1250, "kid": "interest", "note": ""}, {"name": "老爸评测", "mid": 347667464, "what": "检测日用品的安全和成分", "like": "AvE（测东西的那一面）", "fans": "467.5 万", "videos": 621, "kid": "pick", "note": "自己也卖货"}, {"name": "Fallen_Breath", "mid": 4690315, "what": "技术向《我的世界》，研究游戏机制和红石", "like": "cubicmetre、ilmango", "fans": "8.4 万", "videos": 51, "kid": "pick", "note": "非常硬核，玩 MC 的孩子可能会着迷"}, {"name": "GAMES-Webinar", "mid": 512313464, "what": "计算机图形学的课程和讲座", "like": "Inigo Quilez、Makin' Stuff Look Good", "fans": "14.2 万", "videos": 459, "kid": "later", "note": ""}]}, {"tier": "D", "label": "好内容，喜欢就看", "items": [{"name": "一席精选", "mid": 26079128, "what": "各领域人物的演讲", "like": "Strange Loop", "fans": "102 万", "videos": 679, "kid": "pick", "note": "话题杂，有成人向的"}, {"name": "科学声音", "mid": 355126576, "what": "科普平台的官方号", "like": "—", "fans": "28.7 万", "videos": 841, "kid": "unknown", "note": ""}, {"name": "航模情报局", "mid": 391646769, "what": "航模", "like": "PeterSripol、rctestflight", "fans": "13.5 万", "videos": 731, "kid": "unknown", "note": ""}, {"name": "清风电子DIY", "mid": 476575255, "what": "电子 DIY", "like": "bitluni、CNLohr", "fans": "7.5 万", "videos": 2032, "kid": "unknown", "note": ""}]}], "originals": [{"name": "3Blue1Brown", "mid": 88461692, "orig": "3Blue1Brown", "tristan": "C", "fans": "278.5 万", "videos": 150, "kid": "interest", "note": "适合数学好的孩子"}, {"name": "Veritasium真理元素", "mid": 94742590, "orig": "Veritasium", "tristan": "D", "fans": "117.5 万", "videos": 361, "kid": "go", "note": ""}, {"name": "Hacksmith", "mid": 696648800, "orig": "Hacksmith Industries", "tristan": "C", "fans": "97.1 万", "videos": 210, "kid": "interest", "note": "原作者也说这个频道是面向孩子的"}, {"name": "MarkRober官方", "mid": 3546769141008790, "orig": "Mark Rober", "tristan": "D", "fans": "41.2 万", "videos": 184, "kid": "go", "note": "多数视频有中文配音分 P"}, {"name": "Integza_官方频道", "mid": 1479411815, "orig": "Integza", "tristan": "D", "fans": "4.2 万", "videos": 32, "kid": "pick", "note": "发动机、火焰实验，容易被模仿"}], "tierGaps": ["精密机加工、钟表制作（Clickspring、This Old Tony）", "化学合成（NileRed）：搜到的化学号偏危险实验，没收", "工业事故调查动画（USCSB）", "火箭、航模的主动控制（BPS.space）", "乐高机械（Akiyuki、Brick Experiment Channel）", "军事史动画（The Operations Room）", "游戏速通分析（Pannen、Bismuth）"], "tierSource": {"title": "Tristan Hume《YouTube Tier List 2026》", "url": "https://thume.ca/2026/11/01/youtube-tier-list-2026/", "checked": "2026-11-09"}};
 const state = {
   view: 'home',
   q: '',
@@ -263,23 +361,61 @@ const state = {
   idx: 0,
   dark: true,
   tv: false,
+  tierFilter: 'all',
 };
+const VIEWS = ['home', 'path', 'tiers', 'watch', 'about'];
+const PATH_CAT = '成长路线';
 
 const $ = (s, el=document) => el.querySelector(s);
 const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 
-function filtered() {
-  const q = state.q.trim().toLowerCase();
-  return DATA.videos.filter(v => {
-    const catOk = state.cat === '全部' || v.category === state.cat;
-    const hay = (v.title + ' ' + v.channel + ' ' + v.category).toLowerCase();
-    return catOk && (!q || hay.includes(q));
-  });
+// ---------- 看完标记（只存在这台设备的浏览器里） ----------
+const DONE_KEY = 'bilipicks-done-v1';
+let done = {};
+try { done = JSON.parse(localStorage.getItem(DONE_KEY) || '{}') || {}; } catch {}
+const isDone = id => !!done[id];
+function toggleDone(id) {
+  if (done[id]) delete done[id]; else done[id] = Date.now();
+  try { localStorage.setItem(DONE_KEY, JSON.stringify(done)); } catch {}
 }
 
-function embedUrl(bv, autoplay=0) {
-  return `https://player.bilibili.com/player.html?bvid=${encodeURIComponent(bv)}&high_quality=1&danmaku=0&autoplay=${autoplay}&as_wide=1`;
+// ---------- 成长路线 ----------
+const byId = Object.fromEntries(DATA.videos.map(v => [v.id, v]));
+const PATH = DATA.path || {stages: []};
+const pathInfo = {};   // id -> {stage, step, note}
+const pathItems = [];  // 按顺序展开，跳过失效视频
+PATH.stages.forEach((st, si) => st.items.forEach((it, k) => {
+  const v = byId[it.id];
+  if (!v || v.dead) return;
+  pathInfo[it.id] = {stage: si + 1, step: k + 1, note: it.note};
+  pathItems.push(v);
+}));
+const nextUndone = () => pathItems.find(v => !isDone(v.id)) || pathItems[0];
+const doneCount = list => list.filter(v => isDone(v.id)).length;
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  const base = state.cat === PATH_CAT ? pathItems
+    : DATA.videos.filter(v => !v.dead && (state.cat === '全部' || v.category === state.cat));
+  if (!q) return base;
+  return base.filter(v => (v.title + ' ' + v.channel + ' ' + v.category).toLowerCase().includes(q));
 }
+
+function embedUrl(v, autoplay=0) {
+  const p = v.page > 1 ? `&p=${v.page}` : '';
+  return `https://player.bilibili.com/player.html?bvid=${encodeURIComponent(v.id)}${p}&high_quality=1&danmaku=0&autoplay=${autoplay}&as_wide=1`;
+}
+
+function fmtDur(sec) {
+  if (!sec) return '';
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  const pad = n => String(n).padStart(2, '0');
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+// 合集：显示「第 1 集时长 · 共 N 集」；用 page 指定配音版的视频不算合集
+// 老数据里有写「无」「无明显问题」的家长提示，不显示
+const cautionOf = v => (v.caution && !/^无(明显问题)?$/.test(v.caution.trim())) ? v.caution : '';
+const lenLabel = v => fmtDur(v.duration) + (v.parts > 1 && !v.page ? ` · 共 ${v.parts} 集` : '');
 
 function setTheme() {
   document.documentElement.classList.toggle('light', !state.dark);
@@ -299,42 +435,69 @@ function setTV(on) {
   }
 }
 
+// 换视频时用 location.replace，不在浏览器历史里留记录：
+// 直接改 iframe.src 会让安卓返回键先在看过的视频之间倒退，回不到上一页
+function setFrame(iframe, src) {
+  if (!iframe || iframe.dataset.src === src) return;
+  iframe.dataset.src = src;
+  try { iframe.contentWindow.location.replace(src); }
+  catch { iframe.src = src; }
+}
+
+function paintDone(v) {
+  const b = $('#btn-done');
+  const on = v && isDone(v.id);
+  b.textContent = on ? '✓ 已看完' : '✓ 看完了';
+  b.classList.toggle('done-on', on);
+  b.title = on ? '点一下取消标记' : '标记为看完，成长路线会记进度';
+}
+
 function paintPlayers(autoplay=0) {
   const list = filtered();
   if (!list.length) return;
-  if (state.idx >= list.length) state.idx = 0;
+  if (state.idx >= list.length || state.idx < 0) state.idx = 0;
   const v = list[state.idx];
-  const src = embedUrl(v.id, autoplay);
+  const src = embedUrl(v, autoplay);
   const iframe = $('#main-player');
   const empty = $('#player-empty');
   if (iframe) {
-    iframe.src = src;
     iframe.hidden = false;
     empty.hidden = true;
+    setFrame(iframe, src);
   }
-  const tv = $('#tv-player');
-  if (tv) tv.src = src;
+  setFrame($('#tv-player'), src);
   $('#now-title').textContent = v.title;
-  $('#now-meta').innerHTML = `<span>${esc(v.channel)}</span><span>${esc(v.category)}</span><span>建议 ${v.minAge}+</span><span>${esc(v.id)}</span>`;
-  $('#now-why').textContent = v.reason || '';
-  $('#now-why').hidden = !v.reason;
-  $('#now-caution').textContent = v.caution ? ('家长提示：' + v.caution) : '';
-  $('#now-caution').hidden = !v.caution;
+  const pi = pathInfo[v.id];
+  $('#now-meta').innerHTML = [
+    v.channel, v.category, lenLabel(v), `建议 ${v.minAge}+`,
+    pi ? `成长路线 第 ${pi.stage} 阶段 · 第 ${pi.step} 步` : '',
+  ].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join('');
+  const why = pi && state.cat === PATH_CAT ? `${pi.note}。${v.reason || ''}` : (v.reason || '');
+  $('#now-why').textContent = why;
+  $('#now-why').hidden = !why;
+  $('#now-caution').textContent = cautionOf(v) ? ('家长提示：' + cautionOf(v)) : '';
+  $('#now-caution').hidden = !cautionOf(v);
   $('#open-bili').href = v.url;
   $('#tv-hd').href = v.url;
   $('#open-channel').href = v.channelUrl || '#';
   $('#tv-title').textContent = v.title;
+  paintDone(v);
   paintQueue(list);
   highlightCards();
 }
 
 function paintQueue(list) {
   const box = $('#queue');
-  box.innerHTML = list.slice(0, 40).map((v,i) => `
+  const inPath = state.cat === PATH_CAT;
+  box.innerHTML = list.slice(0, 60).map((v,i) => {
+    const pi = pathInfo[v.id];
+    const sub = inPath && pi ? `${pi.stage}-${pi.step} · ${pi.note}` : `${v.channel} · ${v.category}`;
+    return `
     <button type="button" data-i="${i}" class="${i===state.idx?'on':''}">
-      <span class="t">${esc(v.title)}</span>
-      <span class="s">${esc(v.channel)} · ${esc(v.category)}</span>
-    </button>`).join('');
+      <span class="t">${isDone(v.id) ? '✓ ' : ''}${esc(v.title)}</span>
+      <span class="s">${esc(sub)}</span>
+    </button>`;
+  }).join('');
   $$('#queue button').forEach(b => b.onclick = () => {
     state.idx = Number(b.dataset.i);
     paintPlayers(0);
@@ -352,7 +515,7 @@ function esc(s) {
 }
 
 function renderChips() {
-  const cats = ['全部', ...DATA.categories];
+  const cats = ['全部', PATH_CAT, ...DATA.categories];
   $('#chips').innerHTML = cats.map(c => `<button type="button" class="chip ${c===state.cat?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
   $$('#chips .chip').forEach(b => b.onclick = () => {
     state.cat = b.dataset.cat;
@@ -362,54 +525,193 @@ function renderChips() {
   });
 }
 
+function renderBanner() {
+  const n = pathItems.length, d = doneCount(pathItems);
+  const nx = nextUndone();
+  $('#path-banner').innerHTML = `
+    <div><b>🧭 ${esc(PATH.title || '成长路线')}</b></div>
+    <div class="sub">${PATH.stages.length} 个阶段、${n} 步，从科学和数学打底，一步步走到神经网络。已看 ${d} / ${n}。</div>
+    <button type="button" class="pill" data-go="path">看路线</button>
+    ${nx ? `<button type="button" class="pill primary" data-play="${esc(nx.id)}">${d ? '继续看' : '从第 1 步开始'} →</button>` : ''}`;
+  $('#path-banner [data-go]').onclick = () => go('path');
+  const p = $('#path-banner [data-play]');
+  if (p) p.onclick = () => playPath(p.dataset.play);
+}
+
 function renderHome() {
   const list = filtered();
-  $('#result').textContent = `${list.length} 个手选视频 · 无推荐算法 · 嵌入 B 站官方播放器`;
+  renderBanner();
+  $('#result').textContent = state.cat === PATH_CAT
+    ? `成长路线 ${list.length} 步 · 按顺序排列`
+    : `${list.length} 个手选视频 · 无推荐算法 · 嵌入 B 站官方播放器`;
   $('#grid').innerHTML = list.map((v,i) => `
     <button type="button" class="card" data-id="${esc(v.id)}" data-i="${i}">
       <div class="thumb ${v.cover?'has-cover':''}" data-bvid="${esc(v.id)}">
         ${v.cover?`<img class="cover" src="${esc(v.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}
-        <span class="tag">${esc(v.category)}</span>
+        <span class="tag">${esc(state.cat === PATH_CAT && pathInfo[v.id] ? `第 ${pathInfo[v.id].stage} 阶段` : v.category)}</span>
         <span class="play">▶</span>
+        ${isDone(v.id) ? '<span class="done">✓ 看过</span>' : ''}
         <span class="age">${v.minAge}+</span>
       </div>
       <div class="body">
         <h3>${esc(v.title)}</h3>
-        <div class="sub">${esc(v.channel)} · ${esc(v.id)}</div>
+        <div class="sub">${esc(v.channel)}${v.duration ? ` · <span class="dur">${esc(lenLabel(v))}</span>` : ''}</div>
       </div>
     </button>`).join('') || '<p class="empty">没有匹配项，换个分类或关键词试试。</p>';
   $$('#grid .card').forEach(c => c.onclick = () => {
     state.idx = Number(c.dataset.i);
-    state.view = 'watch';
-    renderAll();
-    paintPlayers(0);
+    go('watch');
   });
   renderChips();
 }
 
+function playPath(id) {
+  state.cat = PATH_CAT;
+  state.q = '';
+  $('#search').value = '';
+  state.idx = Math.max(0, pathItems.findIndex(v => v.id === id));
+  go('watch');
+}
+
+function renderPath() {
+  const n = pathItems.length, d = doneCount(pathItems);
+  const nx = nextUndone();
+  const stages = PATH.stages.map((st, si) => {
+    const vids = st.items.map(it => byId[it.id]).filter(v => v && !v.dead);
+    const steps = st.items.map((it, k) => {
+      const v = byId[it.id];
+      if (!v || v.dead) return '';
+      const ok = isDone(v.id);
+      return `
+      <button type="button" class="step ${ok ? 'is-done' : ''}" data-play="${esc(v.id)}">
+        <span class="n">${ok ? '✓' : k + 1}</span>
+        <span class="mini">${v.cover ? `<img src="${esc(v.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}</span>
+        <span>
+          <div class="t">${esc(v.title)}</div>
+          <div class="note">${esc(it.note)}</div>
+          <div class="s">${esc(v.channel)} · ${esc(lenLabel(v))} · ${v.minAge}+${cautionOf(v) ? ' · 家长提示：' + esc(cautionOf(v)) : ''}</div>
+        </span>
+      </button>`;
+    }).join('');
+    return `
+    <section class="pstage">
+      <div class="stage-head">
+        <span class="no">${si + 1}</span>
+        <h2>${esc(st.name)}</h2>
+        <span class="age">${esc(st.age)}</span>
+        <span class="count">${doneCount(vids)} / ${vids.length}</span>
+      </div>
+      <p class="goal">${esc(st.goal)}</p>
+      <div class="steps">${steps}</div>
+    </section>`;
+  }).join('');
+  $('#path-root').innerHTML = `
+    <div style="color:var(--muted);letter-spacing:1px;font-size:12px">LEARNING PATH</div>
+    <h1>🧭 ${esc(PATH.title || '成长路线')}</h1>
+    <p class="intro">${esc(PATH.intro || '')}</p>
+    <ul class="tips">${(PATH.tips || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+    <div class="path-top">
+      <div class="progress" aria-label="进度"><i style="width:${n ? Math.round(d / n * 100) : 0}%"></i></div>
+      <span class="count">已看 ${d} / ${n}</span>
+      ${nx ? `<button type="button" class="pill primary" data-play="${esc(nx.id)}">${d ? '继续看' : '从第 1 步开始'} →</button>` : ''}
+    </div>
+    ${stages}
+    <p style="color:var(--muted);font-size:12px">进度只记在这台设备的浏览器里，清除浏览数据会丢。播放页点「✓ 看完了」打勾，再点一次取消。</p>`;
+  $$('#path-root [data-play]').forEach(b => b.onclick = () => playPath(b.dataset.play));
+}
+
+const KID = {
+  go: '✅ 五六年级直接看',
+  interest: '🔵 看孩子兴趣',
+  pick: '⚠️ 家长先挑',
+  later: '⏳ 初中以后',
+  unknown: '❔ 还没细看',
+};
+function renderTiers() {
+  const show = r => state.tierFilter === 'all' || r.kid === 'go' || r.kid === 'interest';
+  const onSite = name => DATA.videos.filter(v => !v.dead && v.channel === name).length;
+  const row = (r, extra) => {
+    const n = onSite(r.name);
+    return `
+    <div class="row">
+      <div class="top">
+        <a class="name" href="https://space.bilibili.com/${esc(r.mid)}" target="_blank" rel="noopener noreferrer">${esc(r.name)} ↗</a>
+        <span class="kid ${esc(r.kid)}">${esc(KID[r.kid] || '')}</span>
+      </div>
+      ${extra}
+      <div class="s">${esc(r.fans)} 粉丝 · ${esc(r.videos)} 个视频${n ? ` · <a href="#" data-q="${esc(r.name)}" style="color:var(--accent)">本站有 ${n} 条 →</a>` : ''}</div>
+      ${r.note ? `<div class="note">${esc(r.note)}</div>` : ''}
+    </div>`;
+  };
+  const section = (badge, title, sub, rows) => rows.length ? `
+    <section class="tier">
+      <div class="tier-head"><span class="tier-badge ${badge}">${badge === 'O' ? '原' : badge}</span><h2>${esc(title)}</h2><span class="tsub">${esc(sub)}</span></div>
+      <div class="rows">${rows.join('')}</div>
+    </section>` : '';
+  const originals = (DATA.originals || []).filter(show).map(r =>
+    row(r, `<div class="what">原频道 ${esc(r.orig)} · Tristan 评 ${esc(r.tristan)}</div>`));
+  const tiers = (DATA.tiers || []).map(t => section(t.tier, `${t.tier} · ${t.label}`, '',
+    t.items.filter(show).map(r => row(r, `<div class="what">${esc(r.what)}</div><div class="s">对标：${esc(r.like)}</div>`)))).join('');
+  const src = DATA.tierSource || {};
+  $('#tiers-root').innerHTML = `
+    <div style="color:var(--muted);letter-spacing:1px;font-size:12px">TIER LIST</div>
+    <h1>B 站频道榜</h1>
+    <p class="lead">参考 <a href="${esc(src.url)}" target="_blank" rel="noopener noreferrer">${esc(src.title)}</a> 的思路：看重讲得深、制作好、能讲给外行听、有动手的工程味。S 杰作，A 开眼界、旧视频值得补完，B 基本每期都好，C 很多好片，D 喜欢就看。分档是编辑判断（按内容方向和口碑，没有逐个看片）；粉丝数 ${esc(DATA.built)} 更新。</p>
+    <div class="legend">${Object.entries(KID).map(([k, t]) => `<span class="kid ${k}">${esc(t)}</span>`).join('')}</div>
+    <div class="chips" style="position:static">
+      <button type="button" class="chip ${state.tierFilter === 'all' ? 'on' : ''}" data-f="all">全部</button>
+      <button type="button" class="chip ${state.tierFilter === 'kid' ? 'on' : ''}" data-f="kid">只看五六年级能看的</button>
+    </div>
+    ${section('O', '原版频道的 B 站官方号', 'Tristan 榜单里 156 个频道，在 B 站有官方号的只有这几个', originals)}
+    ${tiers}
+    <h2 style="margin:28px 0 8px;font-size:18px">还没找到好对应的方向</h2>
+    <ul class="gaps">${(DATA.tierGaps || []).map(g => `<li>${esc(g)}</li>`).join('')}</ul>
+    <p style="color:var(--muted);font-size:12px">Primitive Technology、Stuff Made Here、Kiwami Japan 等原版频道，B 站上只有别人的搬运号，版权说不清，一律不收。</p>`;
+  $$('#tiers-root [data-f]').forEach(b => b.onclick = () => { state.tierFilter = b.dataset.f; renderTiers(); });
+  $$('#tiers-root [data-q]').forEach(a => a.onclick = e => {
+    e.preventDefault();
+    state.q = a.dataset.q; state.cat = '全部'; state.idx = 0;
+    $('#search').value = state.q;
+    go('home');
+  });
+}
+
 function renderAbout() {
   $('#about-kpis').innerHTML = `
-    <div class="kpi"><b>${DATA.videos.length}</b><span>手选视频</span></div>
-    <div class="kpi"><b>${DATA.channels.length}</b><span>频道 / 作品</span></div>
-    <div class="kpi"><b>${DATA.categories.length}</b><span>兴趣分类</span></div>`;
+    <div class="kpi"><b>${DATA.videos.filter(v => !v.dead).length}</b><span>手选视频</span></div>
+    <div class="kpi"><b>${pathItems.length}</b><span>成长路线步数</span></div>
+    <div class="kpi"><b>${(DATA.tiers || []).reduce((n, t) => n + t.items.length, 0) + (DATA.originals || []).length}</b><span>频道榜收录</span></div>`;
 }
 
 function showView() {
   $$('.nav button').forEach(b => b.classList.toggle('on', b.dataset.view===state.view));
-  $('#view-home').classList.toggle('hidden', state.view!=='home');
-  $('#view-watch').classList.toggle('hidden', state.view!=='watch');
-  $('#view-about').classList.toggle('hidden', state.view!=='about');
+  VIEWS.forEach(name => $('#view-' + name).classList.toggle('hidden', state.view !== name));
 }
 
 function renderAll() {
   showView();
   if (state.view === 'home') renderHome();
+  if (state.view === 'path') renderPath();
+  if (state.view === 'tiers') renderTiers();
   if (state.view === 'about') renderAbout();
   if (state.view === 'watch') {
     renderHome(); // keep chips/grid state consistent if returning
     paintPlayers(0);
   }
 }
+
+// 地址栏 #path / #tiers 可以直接打开对应页面；安卓返回键能回到上一页
+const viewFromHash = () => { const h = location.hash.slice(1); return VIEWS.includes(h) ? h : 'home'; };
+function go(view, push=true) {
+  if (state.tv) { state.tv = false; document.body.classList.remove('tv'); }
+  state.view = view;
+  if (push) history.pushState(null, '', view === 'home' ? location.pathname + location.search : '#' + view);
+  renderAll();
+  const el = $('#view-' + view);
+  if (el) el.scrollTop = 0;
+}
+window.addEventListener('popstate', () => go(viewFromHash(), false));
+state.view = viewFromHash();
 
 function next(delta) {
   const list = filtered();
@@ -425,16 +727,20 @@ $('#btn-prev').onclick = () => next(-1);
 $('#btn-next').onclick = () => next(1);
 $('#tv-prev').onclick = () => next(-1);
 $('#tv-next').onclick = () => next(1);
-$$('.nav button').forEach(b => b.onclick = () => {
-  if (state.tv) setTV(false);
-  state.view = b.dataset.view;
-  renderAll();
-});
+$('#btn-done').onclick = () => {
+  const v = filtered()[state.idx];
+  if (!v) return;
+  toggleDone(v.id);
+  paintDone(v);
+  paintQueue(filtered());
+};
+$$('.nav button').forEach(b => b.onclick = () => go(b.dataset.view));
 $('#search').addEventListener('input', e => {
   state.q = e.target.value;
   state.idx = 0;
-  if (state.view === 'home') renderHome();
-  else paintPlayers(0);
+  if (state.view === 'watch') paintPlayers(0);
+  else if (state.view === 'home') renderHome();
+  else go('home');
 });
 
 document.addEventListener('keydown', e => {
