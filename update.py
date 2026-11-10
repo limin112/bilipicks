@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """BiliPicks 数据更新脚本（只用 Python 标准库，在自己电脑上运行）。
 
-数据都内嵌在 bili/index.html 的 `const DATA = {...};` 这一行里，本脚本读它、改它、写回去。
+数据都在 data.js 的 `const DATA = {...};` 这一行里，本脚本读它、改它、写回去。
 
 用法（在仓库根目录运行）：
-  python3 bili/update.py                 刷新：检查失效视频，补封面和时长，更新频道榜的粉丝数
-  python3 bili/update.py --check         只检查、出报告，不改文件
-  python3 bili/update.py --deploy        刷新后 git 提交并推送（推到 main 后 Cloudflare 自动部署）
-  python3 bili/update.py --skip-tiers    刷新时跳过频道榜（少发几十个请求）
+  python3 update.py                 刷新：检查失效视频，补封面和时长，更新频道榜的粉丝数
+  python3 update.py --check         只检查、出报告，不改文件
+  python3 update.py --deploy        刷新后 git 提交并推送（托管在 GitHub Pages / Cloudflare Pages 时会自动上线）
+  python3 update.py --skip-tiers    刷新时跳过频道榜（少发几十个请求）
 
-  python3 bili/update.py add BV1xxxxxxxxx --cat 数学 --age 10 --reason "推荐理由" \
+  python3 update.py add BV1xxxxxxxxx --cat 数学 --age 10 --reason "推荐理由" \
       [--caution "家长提示"] [--page 2] [--stage 3 --note "在成长路线里的说明"]
       加一条视频：标题、UP 主、封面、时长自动从 B 站读取。
       --page   多 P 视频默认播第几 P（比如 Mark Rober 的中文配音在第 2P）
@@ -30,7 +30,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-INDEX = HERE / "index.html"
+INDEX = HERE / "data.js"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
 DATA_RE = re.compile(r"^const DATA = (\{.*\});$", re.M)
@@ -51,7 +51,7 @@ def load():
     text = INDEX.read_text(encoding="utf-8")
     m = DATA_RE.search(text)
     if not m:
-        sys.exit("在 bili/index.html 里找不到 `const DATA = {...};` 这一行")
+        sys.exit("在 data.js 里找不到 `const DATA = {...};` 这一行")
     return text, json.loads(m.group(1))
 
 
@@ -216,7 +216,7 @@ def deploy(msg):
     subprocess.run(["git", "add", rel], cwd=root, check=True)
     subprocess.run(["git", "commit", "-m", msg], cwd=root, check=True)
     subprocess.run(["git", "push"], cwd=root, check=True)
-    print("已推送，Cloudflare 一两分钟后自动上线：https://minlibuilds.com/bili/")
+    print("已推送。如果网站托管在 GitHub Pages / Cloudflare Pages，一两分钟后自动上线。")
 
 
 def cmd_refresh(args):
@@ -233,7 +233,7 @@ def cmd_refresh(args):
         print("\n（--check：没有写入文件）")
         return
     changed = save(text, data)
-    print("\n已写入 bili/index.html" if changed else "\n数据没有变化")
+    print("\n已写入 data.js" if changed else "\n数据没有变化")
     if args.deploy:
         deploy(f"BiliPicks: 数据刷新 {data['built']}")
 
