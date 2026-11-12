@@ -10,8 +10,11 @@
   python3 update.py --skip-tiers    刷新时跳过频道榜（少发几十个请求）
 
   python3 update.py add BV1xxxxxxxxx --cat 数学 --age 10 --reason "推荐理由" \
-      [--caution "家长提示"] [--page 2] [--stage 3 --note "在成长路线里的说明"]
+      [--caution "家长提示"] [--page 2] [--stage 3 --note "在成长路线里的说明"] \
+      [--title "自己起的标题"] [--orig "原作者"]
       加一条视频：标题、UP 主、封面、时长自动从 B 站读取。
+      --title  B 站标题太长或太标题党时，换一个自己写的标题
+      --orig   搬运、译制的视频写上原作者（比如 "Andrej Karpathy"），页面会标出来
       --page   多 P 视频默认播第几 P（比如 Mark Rober 的中文配音在第 2P）
       --stage  同时加进「成长路线」第几阶段（从 1 开始数）
 
@@ -158,7 +161,7 @@ def refresh_videos(data, report):
         owner = (d.get("owner") or {}).get("name", "")
         if owner and owner != v["channel"]:
             report["renamed"].append(f"{bv}：页面写的是「{v['channel']}」，B 站现在是「{owner}」")
-        if d.get("title") and d["title"] != v["title"]:
+        if d.get("title") and d["title"] != v["title"] and not v.get("titleLocked"):
             report["retitled"].append(f"{bv}：「{v['title']}」→「{d['title']}」（没改，需要的话手动改）")
     print()
 
@@ -257,7 +260,7 @@ def cmd_add(args):
         sys.exit(f"{bv} 只有 {len(pages)} P，没有第 {page} P")
     v = {
         "id": bv,
-        "title": d["title"],
+        "title": args.title or d["title"],
         "url": f"https://www.bilibili.com/video/{bv}" + (f"?p={page}" if page > 1 else ""),
         "channel": owner["name"],
         "channelUrl": f"https://space.bilibili.com/{owner['mid']}",
@@ -268,6 +271,10 @@ def cmd_add(args):
         "cover": cover_url(d.get("pic", "")),
         "duration": pages[page - 1]["duration"] if pages else d.get("duration"),
     }
+    if args.title:
+        v["titleLocked"] = True  # 标题是自己写的，刷新时不再提醒「标题变了」
+    if args.orig:
+        v["orig"] = args.orig
     if page > 1:
         v["page"] = page
     if len(pages) > 1:
@@ -284,7 +291,7 @@ def cmd_add(args):
     data["built"] = datetime.date.today().isoformat()
     save(text, data)
     m, s = divmod(v["duration"] or 0, 60)
-    print(f"已加入：{d['title']}（{owner['name']}，{m}:{s:02d}）→ {args.cat}"
+    print(f"已加入：{v['title']}（{owner['name']}，{m}:{s:02d}）→ {args.cat}"
           + (f"，成长路线第 {args.stage} 阶段" if args.stage else ""))
     if args.deploy:
         deploy(f"BiliPicks: 加入 {bv}")
@@ -305,6 +312,8 @@ def main():
     a.add_argument("--page", type=int, help="默认播第几 P")
     a.add_argument("--stage", type=int, help="加进成长路线第几阶段")
     a.add_argument("--note", help="在成长路线里的说明，默认用推荐理由")
+    a.add_argument("--title", help="自己写的标题，默认用 B 站标题")
+    a.add_argument("--orig", help="搬运、译制视频的原作者")
     a.add_argument("--deploy", action="store_true", help="加完后 git 提交并推送")
     args = p.parse_args()
     if args.cmd == "add":
