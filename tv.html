@@ -33,11 +33,6 @@ h1,h2,h3,p{margin:0}
 .top-r{margin-left:auto;display:flex;align-items:center;color:#c9d4e5;font-size:1.05rem}
 .top-r .prog{margin-right:1.6rem}
 .top-r .prog b{color:#fff}
-/* 右上角「检查更新」：只在 1.2 起的应用里能按（方向键从豆腐块往上走到它） */
-.upd{margin-right:1.6rem;padding:.35rem 1.1rem;border-radius:2rem;background:rgba(255,255,255,.1);font-size:.95rem;font-weight:700;color:#c9d4e5;white-space:nowrap;transition:transform .2s}
-.upd.new{background:#ffc531;color:#3a2600}
-.upd.f{transform:scale(1.08);box-shadow:0 0 0 .2rem #fff}
-.upd.note{background:none;padding:0;color:#ffc531}
 .clock{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;color:#fff}
 
 /* ---------- 首页：整页靠 transform 上下移动，不用浏览器滚动 ---------- */
@@ -69,10 +64,23 @@ h1,h2,h3,p{margin:0}
 .bar i{display:block;height:100%;background:#fff;border-radius:.2rem}
 .stage.all-done .no::before{content:"✓ ";}
 .stage.later{filter:saturate(.55)} /* 初中以后的关卡（数据里 later: true），颜色淡一点 */
-.dice{background:linear-gradient(150deg,#2b3a55,#1c2840);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-.dice .ic{font-size:2.1rem}
-.dice .nm{margin-top:.4rem;font-size:1rem;font-weight:800}
-.dice small{color:#9fb0c8;font-size:.78rem;margin-top:.15rem}
+/* 右下角一格分成上下两块：随便看看 / 设置 */
+.duo{display:grid;grid-template-rows:1fr 1fr;grid-gap:.7rem}
+.dice,.gear{display:flex;align-items:center;justify-content:center;padding:0 .8rem;background:linear-gradient(150deg,#2b3a55,#1c2840)}
+.dice .ic,.gear .ic{font-size:1.5rem;margin-right:.55rem}
+.dice .nm,.gear .nm{font-size:1rem;font-weight:800}
+.reddot{position:absolute;top:.55rem;right:.6rem;width:.8rem;height:.8rem;border-radius:50%;background:#ff3b30;box-shadow:0 0 0 .18rem #1c2840}
+
+/* 设置面板 */
+.panel{position:fixed;top:0;left:0;right:0;bottom:0;z-index:30;background:rgba(5,8,15,.72);display:flex;align-items:center;justify-content:center}
+.panel-box{width:40rem;padding:2rem 2.2rem 1.6rem;border-radius:1.4rem;background:#162033;box-shadow:0 1.5rem 4rem rgba(0,0,0,.5)}
+.panel-box h2{font-size:1.5rem;font-weight:800;margin-bottom:1.2rem}
+.pitem{display:block;padding:1rem 1.2rem;background:#1f2c45}
+.pitem b{display:block;font-size:1.15rem}
+.pitem small{display:block;margin-top:.3rem;color:#a9b7cc;font-size:.88rem;line-height:1.5}
+.pitem .reddot{box-shadow:0 0 0 .18rem #1f2c45}
+.pnote{margin-top:1.1rem;color:#7f90a8;font-size:.85rem;line-height:1.6}
+.phint{margin-top:.8rem;color:#c3cede;font-size:.9rem}
 
 /* 一排一排的视频方块 */
 .row{position:relative;height:14.4rem;margin:-.7rem -3.5rem 0;overflow:hidden} /* 伸到屏幕两边再裁：右边露半块提示还有，焦点放大也不被切 */
@@ -125,7 +133,7 @@ h1,h2,h3,p{margin:0}
 <div class="bg"></div>
 <header class="top">
   <div class="logo"><i>▶</i><b>BiliPicks</b><span id="sub"></span></div>
-  <div class="top-r"><span class="upd" id="upd" hidden></span><span class="prog" id="prog"></span><span class="clock" id="clock"></span></div>
+  <div class="top-r"><span class="prog" id="prog"></span><span class="clock" id="clock"></span></div>
 </header>
 <main class="home" id="home"></main>
 <div class="msg" id="msg"><b>BiliPicks</b>正在加载…</div>
@@ -148,6 +156,14 @@ h1,h2,h3,p{margin:0}
   </div>
   <div class="paused">已暂停，按 OK 继续</div>
   <div class="strip" id="strip"><div class="sec-h"><span class="dot"></span><span id="strip-name"></span><small id="strip-count"></small></div><div class="row"><div class="track" id="strip-track"></div></div></div>
+</section>
+<section class="panel" id="panel" hidden>
+  <div class="panel-box">
+    <h2>设置</h2>
+    <div class="tile pitem f"><b id="p-upd-t">应用更新</b><small id="p-upd-s"></small><i class="reddot" id="p-upd-dot" hidden></i></div>
+    <p class="pnote" id="p-note"></p>
+    <p class="phint">OK 确认 · 返回键关闭</p>
+  </div>
 </section>
 <div class="toast" id="toast"></div>
 
@@ -265,7 +281,8 @@ function renderHome() {
       '<span class="no">第 ' + st.no + ' 关</span><div class="ic">' + esc(st.icon) + '</div><div class="nm">' + esc(st.name) + '</div>' +
       '<div class="pg">' + n + ' / ' + all + '<span class="bar"><i style="width:' + (all ? Math.round(n / all * 100) : 0) + '%"></i></span></div></div>';
   });
-  html += '<div class="tile dice" data-act="random"><div class="ic">🎲</div><div class="nm">随便看看</div><small>从 ' + D.videos.filter(function (v) { return !v.dead; }).length + ' 条里抽一条</small></div>';
+  html += '<div class="duo"><div class="tile dice" data-act="random"><span class="ic">🎲</span><span class="nm">随便看看</span></div>' +
+    '<div class="tile gear" data-act="settings"><span class="ic">⚙️</span><span class="nm">设置</span><i class="reddot" id="gear-dot"' + (upd.hasNew ? '' : ' hidden') + '></i></div></div>';
   html += '</div></section>';
 
   var lists = [];
@@ -336,11 +353,7 @@ function setFocus(r, c, instant) {
   home.style.transform = 'translateY(' + (-y) + 'px)';
   if (instant) { void home.offsetWidth; home.style.transition = ''; }
 }
-function cleanFocus() {
-  [].forEach.call(document.querySelectorAll('#home .f'), function (e) { e.classList.remove('f'); });
-  upd.focus = false;
-  $('#upd').classList.remove('f');
-}
+function cleanFocus() { [].forEach.call(document.querySelectorAll('#home .f'), function (e) { e.classList.remove('f'); }); }
 
 // 豆腐块里按位置找最近的邻居
 function metroMove(dir) {
@@ -362,16 +375,10 @@ function metroMove(dir) {
 var metroLastBottom = 1;  // 从下面一排回到豆腐块时，回到上次离开的格子
 function homeKey(k) {
   var r = focus.r, c = focus.c, row = rows[r];
-  if (upd.focus) {
-    if (k === 'ok') doUpdate();
-    else if (k === 'down' || k === 'back') setFocus(0, c);
-    return;
-  }
   if (k === 'left' || k === 'right' || k === 'up' || k === 'down') {
     if (row.metro) {
       var n = metroMove(k);
       if (n >= 0) { setFocus(0, n); return; }
-      if (k === 'up' && updFocusable()) { cleanFocus(); upd.focus = true; $('#upd').classList.add('f'); return; }
       if (k === 'down' && rows.length > 1) { metroLastBottom = c; cleanFocus(); setFocus(1, rowCol[1] || 0); }
       return;
     }
@@ -383,6 +390,7 @@ function homeKey(k) {
   if (k === 'ok') {
     if (row.metro) {
       var el = row.items[c];
+      if (el.getAttribute('data-act') === 'settings') { openPanel(); return; }
       if (el.getAttribute('data-act') === 'continue') { var v = nextUndone(); play(pathItems, pathItems.indexOf(v), '成长路线', true); }
       else if (el.getAttribute('data-act') === 'random') {
         var pool = D.videos.filter(function (v) { return !v.dead && !isDone(v.id); });
@@ -600,7 +608,7 @@ function focusVideo(v) {
 // 返回 'seek+' / 'seek-' 让应用往播放器里按一下 → / ←（快进 / 快退）。
 window.tvKey = function (k) {
   if (!D) return k === 'back' ? 'exit' : '';
-  var r = P ? playerKey(k) : homeKey(k);
+  var r = P ? playerKey(k) : panelOpen ? panelKey(k) : homeKey(k);
   return r || '';
 };
 var KEYMAP = {ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', Enter: 'ok', ' ': 'ok', Escape: 'back', Backspace: 'back', ContextMenu: 'menu',
@@ -614,53 +622,78 @@ document.addEventListener('keydown', function (e) {
 // 播放器 iframe 抢走焦点时（比如用鼠标点了它），把焦点要回来，方向键才不会被它吃掉
 window.addEventListener('blur', function () { if (!IN_APP) setTimeout(function () { window.focus(); }, 0); });
 
-// ---------- 应用更新 ----------
+// ---------- 设置 / 应用更新 ----------
+// 豆腐块右下角「设置」：有新版应用时角上亮小红点，按 OK 打开设置面板，在面板里按 OK 更新。
 // 1.2 起的应用会给页面一个 BiliPicksApp：versionCode() / versionName() / update()。
 // 最新版的信息在同目录的 tv-app.json（由 android/release.sh 生成）。下载、校验、安装都在应用里做，进度回调 tvUpdateState()。
 var APP = window.BiliPicksApp || null;
-var upd = {focus: false, busy: false};
-function paintUpd(text, isNew, note) {
-  var b = $('#upd');
-  b.hidden = false;
-  b.textContent = text;
-  b.classList.toggle('new', !!isNew);
-  b.classList.toggle('note', !!note);
+// 安装包和 tv.html 放在同一个目录（android/release.sh 会复制过去）
+var APK_URL = location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'BiliPicks-tv.apk';
+var upd = {busy: false, latest: null, hasNew: false};
+var panelOpen = false;
+function setDot(on) {
+  upd.hasNew = on;
+  ['#gear-dot', '#p-upd-dot'].forEach(function (sel) { var e = $(sel); if (e) e.hidden = !on; });
 }
-var updFocusable = function () { return !!APP && !$('#upd').hidden; };
+function paintUpd(title, sub) {
+  $('#p-upd-t').textContent = title;
+  $('#p-upd-s').textContent = sub || '';
+}
+// 面板里那一项平时显示什么（不在更新过程中时）
+function paintIdle() {
+  var m = upd.latest;
+  if (APP) {
+    var cur = 'v' + APP.versionName();
+    if (upd.hasNew) paintUpd('更新到 ' + m.versionName, '现在是 ' + cur + (m.notes ? ' · 新版：' + m.notes : '') + ' · 按 OK 更新');
+    else paintUpd('检查更新', '现在是 ' + cur + ' · 按 OK 检查');
+  } else if (IN_APP) {  // 1.0 / 1.1：还没有一键更新
+    paintUpd(m ? '有新版应用 ' + m.versionName : '应用更新', '这一版不能一键更新：用 U 盘或 adb 装一次新版（' + APK_URL + '），之后就能在这里一键更新');
+  } else {  // 普通浏览器
+    paintUpd('安卓电视 / 投影仪应用', '下载 ' + APK_URL + '，用 U 盘装上：遥控器更顺手，OK 能暂停，◀ ▶ 能快进');
+  }
+  $('#p-note').textContent = '视频清单在网站上更新，不用重装应用 · 看完的进度存在这台设备上 · BiliPicks 不是 B 站官方产品';
+}
 function checkUpd() {
-  if (!IN_APP) return;
-  var here = APP ? 'v' + APP.versionName() + ' · 检查更新' : '';
   fetch('tv-app.json?t=' + Date.now(), {cache: 'no-store'}).then(function (r) { return r.json(); }).then(function (m) {
-    if (!APP) {  // 1.0 / 1.1：还没有一键更新，只能提示
-      paintUpd('有新版应用 ' + m.versionName + '：这一次要用 U 盘或 adb 装，之后就能一键更新', false, true);
-      return;
-    }
-    if (m.versionCode > APP.versionCode()) paintUpd('有新版 ' + m.versionName + ' · 按 OK 更新', true);
-    else paintUpd(here);
-  }).catch(function () { if (APP) paintUpd(here); });
+    upd.latest = m;
+    if (APP) setDot(m.versionCode > APP.versionCode());
+    else setDot(IN_APP);  // 旧版应用一定比网站上的旧
+    if (!upd.busy) paintIdle();
+  }).catch(function () { if (!upd.busy) paintIdle(); });
+}
+function openPanel() {
+  panelOpen = true;
+  if (!upd.busy) paintIdle();
+  $('#panel').hidden = false;
+}
+function closePanel() { panelOpen = false; $('#panel').hidden = true; }
+function panelKey(k) {
+  if (k === 'back' || k === 'menu') { closePanel(); return; }
+  if (k !== 'ok') return;
+  if (APP) { doUpdate(); return; }
+  toast(IN_APP ? '这一版要先用 U 盘或 adb 装一次新版' : '在电视上装 BiliPicks 应用才能用', 5000);
 }
 function doUpdate() {
   if (!APP || upd.busy) return;
   upd.busy = true;
-  paintUpd('正在检查…', true);
+  paintUpd('正在检查…');
   APP.update();
 }
 window.tvUpdateState = function (st, arg) {
-  if (st === 'checking') paintUpd('正在检查…', true);
-  else if (st === 'download') paintUpd('正在下载 ' + arg + '%', true);
-  else if (st === 'verify') paintUpd('正在校验…', true);
+  if (st === 'checking') paintUpd('正在检查…');
+  else if (st === 'download') paintUpd('正在下载 ' + arg + '%');
+  else if (st === 'verify') paintUpd('正在校验…');
   else if (st === 'install') {
     upd.busy = false;
-    paintUpd('在弹出的窗口里选「安装」', true);
+    paintUpd('在弹出的窗口里选「安装」', '装好后如果回到了桌面，再打开一次 BiliPicks 就是新版');
     // 有的电视（比如极米）不让应用装完自己重新打开，提前说一声
     toast('装好后如果回到了桌面，再打开一次 BiliPicks 就是新版', 8000);
-  }
-  else if (st === 'latest') { upd.busy = false; paintUpd('v' + arg + ' · 已是最新'); toast('已经是最新版了'); }
+  } else if (st === 'latest') { upd.busy = false; setDot(false); paintUpd('已经是最新版', 'v' + arg); toast('已经是最新版了'); }
   else if (st === 'permission') {
     upd.busy = false;
-    paintUpd('打开允许后，再按 OK 更新', true);
+    paintUpd('先允许安装，再按 OK', '请在打开的设置里允许 BiliPicks「安装未知应用」，然后回来再按一次');
     toast('请在设置里允许 BiliPicks「安装未知应用」，然后回来再按一次', 7000);
-  } else if (st === 'error') { upd.busy = false; paintUpd('更新没成功 · 按 OK 重试', true); toast(arg, 7000); }
+  } else if (st === 'error') { upd.busy = false; paintUpd('更新没成功 · 按 OK 重试', arg); toast(arg, 7000); }
 };
 
 // ---------- 启动 ----------

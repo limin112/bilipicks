@@ -32,7 +32,7 @@ import org.json.JSONObject;
  * 这样焦点永远不会掉进 B 站播放器的 iframe 里，孩子也点不到播放器里的推荐视频。
  * 页面返回 "exit" 就退出应用，返回 "space" / "seek+" / "seek-" 就往播放器里按一下空格 / → / ←（暂停、快进、快退）。
  *
- * 页面里还能用 BiliPicksApp.versionCode() / versionName() / update()：主页右上角的「检查更新」，见 Updater。
+ * 页面里还能用 BiliPicksApp.versionCode() / versionName() / update()：主页右下角「设置」里的应用更新，见 Updater。
  */
 public class MainActivity extends Activity {
     static final String HOME = "https://minlibuilds.com/bili/tv.html";

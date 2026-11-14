@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * 应用内更新：电视版页面上按「更新」→ 页面调 BiliPicksApp.update() → 在后台线程里跑这个。
+ * 应用内更新：电视版主页「设置」里按「更新」→ 页面调 BiliPicksApp.update() → 在后台线程里跑这个。
  *
  * 1. 读和电视版页面同一目录下的 tv-app.json：{"versionCode", "versionName", "apk", "sha256", "notes"}
  * 2. 比当前版本新，就下载 apk（只认和 tv-app.json 同一个网站的 https 地址），边下边算 SHA-256
