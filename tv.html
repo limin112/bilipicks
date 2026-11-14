@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<meta name="robots" content="noindex">
+<title>BiliPicks 电视版</title>
+<!--
+  BiliPicks 电视版：给电视、投影仪用的遥控器界面（方向键 + OK + 返回）。
+  数据和网页版是同一份：data.js，看完进度也共用（同一个 localStorage）。
+  电视、投影仪自带的浏览器内核常常很老（极米投影仪是 Chrome 66），所以这个文件只用 ES2019 语法，
+  CSS 不用 aspect-ratio / inset / gap(flex) / min() / color-mix 这些新写法。
+  键盘也能用：方向键、Enter、Esc（或退格）、空格。
+-->
+<style>
+*{box-sizing:border-box}
+html{font-size:1.25vw;background:#0b1220;overflow:hidden}
+body{margin:0;overflow:hidden;height:100vh;color:#eef3fb;background:#0b1220;
+  font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;cursor:none}
+h1,h2,h3,p{margin:0}
+.bg{position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;
+  background:radial-gradient(60rem 30rem at 85% -10%,rgba(47,134,224,.22),transparent 70%),radial-gradient(50rem 30rem at -10% 110%,rgba(160,91,216,.16),transparent 70%),#0b1220}
+
+/* ---------- 顶栏 ---------- */
+.top{position:fixed;top:0;left:0;right:0;height:5rem;padding:0 3.5rem;display:flex;align-items:center;z-index:5;
+  background:linear-gradient(#0b1220 55%,rgba(11,18,32,0))}
+.logo{display:flex;align-items:center}
+.logo i{width:2.3rem;height:2.3rem;border-radius:.7rem;background:linear-gradient(135deg,#2f9cf0,#6b6ff0);display:flex;align-items:center;justify-content:center;margin-right:.75rem;font-style:normal;font-size:1.05rem;padding-left:.15rem}
+.logo b{font-size:1.45rem;font-weight:800;letter-spacing:.02rem}
+.logo span{margin-left:1rem;color:#93a3bb;font-size:1rem}
+.top-r{margin-left:auto;display:flex;align-items:center;color:#c9d4e5;font-size:1.05rem}
+.top-r .prog{margin-right:1.6rem}
+.top-r .prog b{color:#fff}
+.clock{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;color:#fff}
+
+/* ---------- 首页：整页靠 transform 上下移动，不用浏览器滚动 ---------- */
+.home{position:absolute;top:0;left:0;right:0;padding:5.4rem 0 8rem;transition:transform .32s ease;will-change:transform}
+.sec{padding:0 3.5rem;margin-bottom:2.4rem}
+.sec-h{display:flex;align-items:center;font-size:1.3rem;font-weight:800;margin:0 0 .9rem;white-space:nowrap}
+.sec-h .dot{width:.55rem;height:1.3rem;border-radius:.3rem;background:var(--h,#2f86e0);margin-right:.7rem}
+.sec-h small{font-size:1rem;font-weight:600;color:#8d9bb1;margin-left:.9rem;overflow:hidden;text-overflow:ellipsis}
+
+/* 豆腐块：左边一块大的「继续闯关」，右边 5×2 小方块（9 关 + 随便看看） */
+.metro{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:8.6rem 8.6rem;grid-gap:1.1rem}
+.tile{position:relative;border-radius:1rem;transition:transform .2s ease;will-change:transform}
+/* 焦点：放大 + 白框。用 box-shadow 画框，方块自己的 overflow:hidden 裁不到它 */
+.tile.f{transform:scale(1.07);z-index:3;box-shadow:0 0 0 .25rem #fff,0 .9rem 2.2rem rgba(0,0,0,.55)}
+.big{grid-column:1 / span 2;grid-row:1 / span 2;overflow:hidden;background:#1b2638}
+.big img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.big .shade{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(rgba(8,12,22,.05) 25%,rgba(8,12,22,.92))}
+.big .txt{position:absolute;left:1.2rem;right:1.2rem;bottom:1.1rem}
+.big .lbl{display:inline-block;padding:.2rem .7rem;border-radius:2rem;background:#ffc531;color:#3a2600;font-weight:800;font-size:.85rem;margin-bottom:.5rem}
+.big h2{font-size:1.25rem;line-height:1.35;font-weight:800;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.big p{color:#c3cede;font-size:.9rem;margin-top:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.big .playbtn{position:absolute;right:1.1rem;top:1.1rem;width:3rem;height:3rem;border-radius:50%;background:rgba(255,255,255,.95);color:#13203a;display:flex;align-items:center;justify-content:center;font-size:1.2rem;padding-left:.2rem}
+.stage{padding:.85rem .9rem;overflow:hidden;background:linear-gradient(150deg,var(--h),var(--h2))}
+.stage .ic{font-size:1.9rem;line-height:1}
+.stage .no{position:absolute;right:.8rem;top:.7rem;font-size:.8rem;font-weight:800;color:rgba(255,255,255,.85)}
+.stage .nm{margin-top:.45rem;font-size:.98rem;font-weight:800;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.stage .pg{position:absolute;left:.9rem;right:.9rem;bottom:.75rem;display:flex;align-items:center;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.92)}
+.bar{flex:1;height:.32rem;border-radius:.2rem;background:rgba(255,255,255,.28);margin-left:.6rem;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff;border-radius:.2rem}
+.stage.all-done .no::before{content:"✓ ";}
+.stage.later{filter:saturate(.55)} /* 初中以后的关卡（数据里 later: true），颜色淡一点 */
+.dice{background:linear-gradient(150deg,#2b3a55,#1c2840);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.dice .ic{font-size:2.1rem}
+.dice .nm{margin-top:.4rem;font-size:1rem;font-weight:800}
+.dice small{color:#9fb0c8;font-size:.78rem;margin-top:.15rem}
+
+/* 一排一排的视频方块 */
+.row{position:relative;height:14.4rem;margin:-.7rem -3.5rem 0;overflow:hidden} /* 伸到屏幕两边再裁：右边露半块提示还有，焦点放大也不被切 */
+.track{position:absolute;left:3.5rem;top:.7rem;white-space:nowrap;transition:transform .28s ease;will-change:transform}
+.card{display:inline-block;vertical-align:top;width:14.2rem;margin-right:1.2rem;white-space:normal}
+.card .tile{height:8rem;overflow:hidden;background:#1b2638}
+.card .tile img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:1rem}
+.len{position:absolute;right:.5rem;bottom:.5rem;padding:.1rem .45rem;border-radius:.4rem;background:rgba(0,0,0,.72);font-size:.75rem;font-weight:700;z-index:1}
+.ok{position:absolute;left:.5rem;top:.5rem;padding:.1rem .5rem;border-radius:.4rem;background:#0f9457;font-size:.75rem;font-weight:800;z-index:1}
+.step{position:absolute;left:.5rem;bottom:.5rem;padding:.1rem .5rem;border-radius:.4rem;background:var(--h,#2f86e0);font-size:.75rem;font-weight:800;z-index:1}
+.card .t{margin-top:.75rem;font-size:.95rem;font-weight:700;line-height:1.4;max-height:2.8em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#dfe6f1;transition:color .15s}
+.card .s{margin-top:.2rem;font-size:.8rem;color:#8193ab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.f .t{color:#fff}
+.card.done .tile img{opacity:.55}
+
+/* ---------- 播放 ---------- */
+.player{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:20}
+.player iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+.ov{position:absolute;left:0;right:0;z-index:2;transition:opacity .35s, transform .35s;pointer-events:none}
+.ov.top-ov{top:0;padding:2.2rem 3.5rem 4rem;background:linear-gradient(rgba(0,0,0,.85),rgba(0,0,0,0))}
+.ov.bot-ov{bottom:0;padding:4rem 3.5rem 2rem;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.85));display:flex;align-items:center}
+.player.quiet .ov.top-ov{opacity:0;transform:translateY(-1.5rem)}
+.player.quiet .ov.bot-ov{opacity:0;transform:translateY(1.5rem)}
+.pill{display:inline-block;padding:.2rem .75rem;border-radius:2rem;background:var(--h,#2f86e0);font-size:.85rem;font-weight:800;margin-bottom:.6rem}
+.ov h2{font-size:1.75rem;line-height:1.35;font-weight:800;max-width:62rem;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+.ov .who{color:#c3cede;font-size:1rem;margin-top:.4rem}
+.ov .pos{position:absolute;right:3.5rem;top:2.4rem;font-size:1.1rem;font-weight:700;color:#c3cede}
+.keys{display:flex;flex-wrap:wrap;align-items:center;font-size:.95rem;color:#d5deeb}
+.keys span{display:inline-flex;align-items:center;margin-right:2rem}
+.keys kbd{display:inline-block;min-width:2rem;padding:.1rem .5rem;margin-right:.5rem;border-radius:.45rem;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);font:inherit;font-weight:800;text-align:center}
+.paused{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;padding:1rem 2rem;border-radius:1rem;background:rgba(0,0,0,.7);font-size:1.4rem;font-weight:800;display:none}
+.player.is-paused .paused{display:block}
+
+/* 选集：播放时按 ↓ 从底下升起来一排 */
+.strip{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:2.2rem 0 1.6rem;background:linear-gradient(rgba(5,8,15,0),rgba(5,8,15,.94) 22%);transform:translateY(100%);transition:transform .3s ease}
+.strip.open{transform:none}
+.strip .sec-h{padding:0 3.5rem}
+.strip .row{margin:-.7rem 0 0}
+
+.toast{position:fixed;left:50%;bottom:3rem;z-index:40;transform:translate(-50%,1rem);opacity:0;transition:opacity .25s,transform .25s;
+  padding:.8rem 1.6rem;border-radius:2rem;background:rgba(238,243,251,.96);color:#0b1220;font-size:1.1rem;font-weight:800;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.msg{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:1.4rem;color:#c3cede;text-align:center}
+.msg b{font-size:2rem;color:#fff;margin-bottom:.8rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<header class="top">
+  <div class="logo"><i>▶</i><b>BiliPicks</b><span id="sub"></span></div>
+  <div class="top-r"><span class="prog" id="prog"></span><span class="clock" id="clock"></span></div>
+</header>
+<main class="home" id="home"></main>
+<div class="msg" id="msg"><b>BiliPicks</b>正在加载…</div>
+
+<section class="player quiet" id="player" hidden>
+  <div class="ov top-ov">
+    <span class="pill" id="p-pill"></span>
+    <h2 id="p-title"></h2>
+    <p class="who" id="p-who"></p>
+    <span class="pos" id="p-pos"></span>
+  </div>
+  <div class="ov bot-ov">
+    <div class="keys">
+      <span><kbd>◀</kbd>上一条</span>
+      <span><kbd>OK</kbd>暂停 / 继续</span>
+      <span><kbd>▶</kbd>下一条</span>
+      <span><kbd>▲</kbd>标记看完</span>
+      <span><kbd>▼</kbd>选集</span>
+      <span><kbd>返回</kbd>回首页</span>
+    </div>
+  </div>
+  <div class="paused">已暂停，按 OK 继续</div>
+  <div class="strip" id="strip"><div class="sec-h"><span class="dot"></span><span id="strip-name"></span><small id="strip-count"></small></div><div class="row"><div class="track" id="strip-track"></div></div></div>
+</section>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+'use strict';
+// ---------- 工具 ----------
+var $ = function (s, el) { return (el || document).querySelector(s); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]; }); };
+var store = {
+  get: function (k, fb) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } },
+  set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+// 和网页版共用：看完标记
+var DONE_KEY = 'bilipicks-done-v1';
+var done = store.get(DONE_KEY, {}) || {};
+var isDone = function (id) { return !!done[id]; };
+function setDone(id, on) { if (on) done[id] = Date.now(); else delete done[id]; store.set(DONE_KEY, done); }
+
+var HUES = ['#e9558a', '#f07c2a', '#d49a00', '#2fa866', '#0f9fa3', '#2f86e0', '#6b6ff0', '#a05bd8', '#cf4f9a'];
+var HUES2 = ['#a8326a', '#b84f12', '#9a6c00', '#1d7446', '#0a6e72', '#1d5ea8', '#4447b8', '#7036a3', '#93306c'];
+var IN_APP = /BiliPicksTV/.test(navigator.userAgent);  // 在 BiliPicks 安卓应用里（遥控器键由应用转过来）
+
+function mins(sec) {
+  if (!sec) return '';
+  if (sec >= 3600) return Math.floor(sec / 3600) + ' 小时 ' + Math.round(sec % 3600 / 60) + ' 分';
+  return Math.max(1, Math.round(sec / 60)) + ' 分钟';
+}
+var isSeries = function (v) { return v.parts > 1 && !v.page; };
+var lenLabel = function (v) { return isSeries(v) ? '共 ' + v.parts + ' 集' : mins(v.duration); };
+var who = function (v) { return v.orig || v.channel; };
+// 电视上方块不大，封面请 CDN 缩成小图，省内存也快
+var coverUrl = function (v) { return v.cover ? v.cover.replace(/@[^/]*$/, '') + '@480w_270h_1c.webp' : ''; };
+function embedUrl(v) {
+  var p = v.page > 1 ? '&p=' + v.page : '';
+  return 'https://player.bilibili.com/player.html?bvid=' + encodeURIComponent(v.id) + p + '&high_quality=1&danmaku=0&autoplay=1&as_wide=1';
+}
+var toastTimer;
+function toast(msg, ms) {
+  var t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.remove('show'); }, ms || 2200);
+}
+function tick() {
+  var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  $('#clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+// ---------- 数据 ----------
+// 网站版数据内嵌在 index.html；开源版用 <script src="data.js"> 先加载好 DATA
+// （data.js 里是顶层 const，不挂在 window 上，所以用 typeof 判断）
+function loadData() {
+  if (typeof DATA !== 'undefined') return Promise.resolve(DATA);
+  return fetch('./', {cache: 'no-cache'}).then(function (r) { return r.text(); }).then(function (t) {
+    var m = t.match(/^const DATA = (\{.*\});$/m);
+    if (!m) throw new Error('no DATA');
+    return JSON.parse(m[1]);
+  });
+}
+
+var D, byId = {}, stages = [], pathItems = [], pathInfo = {};
+function prepare(data) {
+  D = data;
+  D.videos.forEach(function (v) { byId[v.id] = v; });
+  var path = D.path || {stages: []};
+  stages = path.stages.map(function (st, si) {
+    var s = {no: si + 1, name: st.name, icon: st.icon || '', age: st.age || '', later: !!st.later, hue: HUES[si % 9], hue2: HUES2[si % 9], vids: [], notes: {}};
+    st.items.forEach(function (it) {
+      var v = byId[it.id];
+      if (!v || v.dead) return;
+      s.vids.push(v);
+      pathInfo[v.id] = {stage: s.no, step: s.vids.length, note: it.note};
+      pathItems.push(v);
+    });
+    return s;
+  });
+}
+var stageOf = function (v) { return v && pathInfo[v.id] ? stages[pathInfo[v.id].stage - 1] : null; };
+var doneCount = function (list) { return list.filter(function (v) { return isDone(v.id); }).length; };
+var nextUndone = function () { return pathItems.filter(function (v) { return !isDone(v.id); })[0] || pathItems[0]; };
+
+// ---------- 首页 ----------
+// rows[r] = {el, items:[tile 元素], list, ctx}；第 0 行是豆腐块（二维，用位置找邻居）
+var rows = [], focus = {r: 0, c: 0}, rowCol = {}, homeY = 0;
+
+function cardHTML(v, i, ctxPath) {
+  var pi = pathInfo[v.id], st = stageOf(v);
+  var title = ctxPath && pi ? pi.note : v.title;
+  var sub = ctxPath && pi ? v.title : who(v) + ' · ' + lenLabel(v);
+  var badge = isDone(v.id) ? '<span class="ok">✓ 看过</span>' : '';
+  var step = ctxPath && pi ? '<span class="step" style="--h:' + st.hue + '">第 ' + pi.step + ' 步</span>' : '';
+  return '<div class="card' + (isDone(v.id) ? ' done' : '') + '" data-i="' + i + '">' +
+    '<div class="tile">' + (v.cover ? '<img data-src="' + esc(coverUrl(v)) + '" alt="" referrerpolicy="no-referrer">' : '') +
+    badge + step + '<span class="len">' + esc(lenLabel(v)) + '</span></div>' +
+    '<p class="t">' + esc(title) + '</p><p class="s">' + esc(sub) + '</p></div>';
+}
+
+function renderHome() {
+  var nu = nextUndone(), nst = stageOf(nu), npi = pathInfo[nu.id];
+  var allDone = doneCount(pathItems) === pathItems.length;
+  var html = '<section class="sec"><div class="metro" id="metro">' +
+    '<div class="tile big" data-act="continue">' + (nu.cover ? '<img data-src="' + esc(nu.cover) + '" alt="" referrerpolicy="no-referrer">' : '') +
+      '<div class="shade"></div><span class="playbtn">▶</span><div class="txt"><span class="lbl">' + (allDone ? '路线全部看完了，再看一遍' : doneCount(pathItems) ? '继续闯关' : '从第 1 关开始') + '</span>' +
+      '<h2>' + esc(npi.note) + '</h2><p>第 ' + nst.no + ' 关 ' + esc(nst.name) + ' · 第 ' + npi.step + ' 步 · ' + esc(lenLabel(nu)) + '</p></div></div>';
+  stages.forEach(function (st) {
+    var n = doneCount(st.vids), all = st.vids.length;
+    html += '<div class="tile stage' + (n === all && all ? ' all-done' : '') + (st.later ? ' later' : '') + '" data-stage="' + st.no + '" style="--h:' + st.hue + ';--h2:' + st.hue2 + '">' +
+      '<span class="no">第 ' + st.no + ' 关</span><div class="ic">' + esc(st.icon) + '</div><div class="nm">' + esc(st.name) + '</div>' +
+      '<div class="pg">' + n + ' / ' + all + '<span class="bar"><i style="width:' + (all ? Math.round(n / all * 100) : 0) + '%"></i></span></div></div>';
+  });
+  html += '<div class="tile dice" data-act="random"><div class="ic">🎲</div><div class="nm">随便看看</div><small>从 ' + D.videos.filter(function (v) { return !v.dead; }).length + ' 条里抽一条</small></div>';
+  html += '</div></section>';
+
+  var lists = [];
+  stages.forEach(function (st) {
+    if (st.vids.length) lists.push({name: '第 ' + st.no + ' 关 · ' + st.name, sub: st.age, hue: st.hue, list: st.vids, path: true});
+  });
+  D.categories.forEach(function (c, ci) {
+    var vs = D.videos.filter(function (v) { return !v.dead && v.category === c; });
+    if (vs.length) lists.push({name: c, sub: vs.length + ' 条', hue: HUES[(ci + 5) % 9], list: vs, path: false});
+  });
+  lists.forEach(function (L, li) {
+    html += '<section class="sec" style="--h:' + L.hue + '"><h3 class="sec-h"><span class="dot"></span>' + esc(L.name) + '<small>' + esc(L.sub) + '</small></h3>' +
+      '<div class="row"><div class="track" data-row="' + (li + 1) + '">' + L.list.map(function (v, i) { return cardHTML(v, i, L.path); }).join('') + '</div></div></section>';
+  });
+  var home = $('#home');
+  home.innerHTML = html;
+
+  rows = [{el: $('#metro'), items: [].slice.call(home.querySelectorAll('#metro .tile')), metro: true}];
+  lists.forEach(function (L, li) {
+    var track = home.querySelector('[data-row="' + (li + 1) + '"]');
+    rows.push({el: track, items: [].slice.call(track.querySelectorAll('.card')), list: L.list, name: L.name, path: L.path, x: 0});
+  });
+  $('#prog').innerHTML = '成长路线 已看 <b>' + doneCount(pathItems) + '</b> / ' + pathItems.length;
+  lazyImages(home);
+  setFocus(Math.min(focus.r, rows.length - 1), focus.c, true);
+}
+
+// 封面只在快露出来时才加载（老内核不认识 loading="lazy"）
+var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
+  es.forEach(function (e) {
+    if (!e.isIntersecting) return;
+    var img = e.target;
+    img.src = img.getAttribute('data-src');
+    io.unobserve(img);
+  });
+}, {rootMargin: '400px 900px'}) : null;
+function lazyImages(root) {
+  [].forEach.call(root.querySelectorAll('img[data-src]'), function (img) {
+    img.onerror = function () { img.remove(); };
+    if (io) io.observe(img); else img.src = img.getAttribute('data-src');
+  });
+}
+
+function tileOf(r, c) { var row = rows[r]; return row && row.items[c]; }
+function setFocus(r, c, instant) {
+  cleanFocus();
+  var row = rows[r];
+  c = Math.max(0, Math.min(c, row.items.length - 1));
+  focus = {r: r, c: c};
+  rowCol[r] = c;
+  var el = row.items[c];
+  el.classList.add('f');
+  if (!row.metro) el.querySelector('.tile').classList.add('f');
+  // 横向：让焦点保持在左数第二格附近
+  if (!row.metro) {
+    var step = el.offsetWidth + parseFloat(getComputedStyle(el).marginRight);
+    var viewW = row.el.parentNode.offsetWidth - 2 * row.el.offsetLeft;
+    var maxX = Math.max(0, row.items.length * step - viewW);
+    row.x = Math.max(0, Math.min(maxX, (c - 1) * step));
+    row.el.style.transform = 'translateX(' + (-row.x) + 'px)';
+  }
+  // 纵向：当前这一行贴着顶栏
+  var sec = row.el.closest('.sec');
+  var y = r === 0 ? 0 : sec.offsetTop - $('.top').offsetHeight - 6;
+  homeY = y;
+  var home = $('#home');
+  if (instant) { home.style.transition = 'none'; void home.offsetWidth; }
+  home.style.transform = 'translateY(' + (-y) + 'px)';
+  if (instant) { void home.offsetWidth; home.style.transition = ''; }
+}
+function cleanFocus() { [].forEach.call(document.querySelectorAll('#home .f'), function (e) { e.classList.remove('f'); }); }
+
+// 豆腐块里按位置找最近的邻居
+function metroMove(dir) {
+  var items = rows[0].items, cur = items[focus.c].getBoundingClientRect();
+  var cx = cur.left + cur.width / 2, cy = cur.top + cur.height / 2, best = -1, bestScore = 1e9;
+  items.forEach(function (el, i) {
+    if (i === focus.c) return;
+    var b = el.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+    var dx = x - cx, dy = y - cy, main, side;
+    if (dir === 'left') { if (b.right > cur.left + 2) return; main = -dx; side = Math.abs(dy); }
+    if (dir === 'right') { if (b.left < cur.right - 2) return; main = dx; side = Math.abs(dy); }
+    if (dir === 'up') { if (b.bottom > cur.top + 2) return; main = -dy; side = Math.abs(dx); }
+    if (dir === 'down') { if (b.top < cur.bottom - 2) return; main = dy; side = Math.abs(dx); }
+    var score = main + side * 2;
+    if (score < bestScore) { bestScore = score; best = i; }
+  });
+  return best;
+}
+var metroLastBottom = 1;  // 从下面一排回到豆腐块时，回到上次离开的格子
+function homeKey(k) {
+  var r = focus.r, c = focus.c, row = rows[r];
+  if (k === 'left' || k === 'right' || k === 'up' || k === 'down') {
+    if (row.metro) {
+      var n = metroMove(k);
+      if (n >= 0) { setFocus(0, n); return; }
+      if (k === 'down' && rows.length > 1) { metroLastBottom = c; cleanFocus(); setFocus(1, rowCol[1] || 0); }
+      return;
+    }
+    if (k === 'left') { if (c > 0) setFocus(r, c - 1); return; }
+    if (k === 'right') { if (c < row.items.length - 1) setFocus(r, c + 1); return; }
+    if (k === 'up') { cleanFocus(); if (r === 1) setFocus(0, metroLastBottom); else setFocus(r - 1, rowCol[r - 1] || 0); return; }
+    if (k === 'down') { if (r < rows.length - 1) { cleanFocus(); setFocus(r + 1, rowCol[r + 1] || 0); } return; }
+  }
+  if (k === 'ok') {
+    if (row.metro) {
+      var el = row.items[c];
+      if (el.getAttribute('data-act') === 'continue') { var v = nextUndone(); play(pathItems, pathItems.indexOf(v), '成长路线', true); }
+      else if (el.getAttribute('data-act') === 'random') {
+        var pool = D.videos.filter(function (v) { return !v.dead && !isDone(v.id); });
+        if (!pool.length) pool = D.videos.filter(function (v) { return !v.dead; });
+        var pick = pool[Math.floor(Math.random() * pool.length)];
+        var cat = D.videos.filter(function (v) { return !v.dead && v.category === pick.category; });
+        play(cat, cat.indexOf(pick), pick.category, false);
+      } else {
+        var st = stages[+el.getAttribute('data-stage') - 1];
+        var first = st.vids.filter(function (v) { return !isDone(v.id); })[0] || st.vids[0];
+        if (first) play(pathItems, pathItems.indexOf(first), '成长路线', true);
+      }
+      return;
+    }
+    play(row.list, c, row.path ? '成长路线' : row.name, row.path, row.path ? pathItems.indexOf(row.list[c]) : -1);
+    return;
+  }
+  if (k === 'back') {
+    if (r !== 0 || c !== 0) { cleanFocus(); setFocus(0, 0); return; }
+    var now = Date.now();
+    if (now - lastBack < 2500) return 'exit';
+    lastBack = now;
+    toast('再按一次返回键退出');
+  }
+}
+var lastBack = 0;
+
+// ---------- 播放 ----------
+var P = null;  // {list, idx, name, path, started, elapsed, paused}
+var mountTimer, secTimer, quietTimer;
+
+// pathIdx：从「第 N 关」那一排点进来时，换成整条路线里的位置，这样 ◀ ▶ 能跨关
+function play(list, idx, name, isPath, pathIdx) {
+  if (isPath && pathIdx >= 0) { list = pathItems; idx = pathIdx; }
+  P = {list: list, idx: idx, name: name, path: isPath, elapsed: 0, paused: false};
+  $('#player').hidden = false;
+  closeStrip();
+  showVideo(0);
+  clearInterval(secTimer);
+  secTimer = setInterval(secTick, 1000);
+}
+function showVideo(delay) {
+  var v = P.list[P.idx], st = stageOf(v), pi = pathInfo[v.id];
+  P.elapsed = 0; P.paused = false; P.marked = false;
+  $('#player').classList.remove('is-paused');
+  var pill = $('#p-pill');
+  if (P.path && st) { pill.textContent = st.icon + ' 第 ' + st.no + ' 关 · 第 ' + pi.step + ' 步'; pill.style.setProperty('--h', st.hue); }
+  else { pill.textContent = P.name; pill.style.setProperty('--h', '#2f86e0'); }
+  $('#p-title').textContent = P.path && pi ? pi.note : v.title;
+  $('#p-who').textContent = (P.path && pi ? v.title + ' · ' : '') + who(v) + (v.orig ? '（搬运）' : '') + ' · ' + lenLabel(v) + (isDone(v.id) ? ' · ✓ 看过' : '');
+  $('#p-pos').textContent = (P.idx + 1) + ' / ' + P.list.length;
+  wake(5000);
+  // 连按 ◀ ▶ 时，中途经过的不加载播放器
+  var box = $('#player');
+  var old = box.querySelector('iframe');
+  if (old) old.remove();
+  clearTimeout(mountTimer);
+  mountTimer = setTimeout(function () {
+    var f = document.createElement('iframe');
+    f.allow = 'autoplay; fullscreen; encrypted-media';
+    f.setAttribute('allowfullscreen', '');
+    f.tabIndex = -1;
+    f.src = embedUrl(v);
+    box.insertBefore(f, box.firstChild);
+  }, delay || 0);
+}
+function stopPlayer() {
+  clearTimeout(mountTimer); clearInterval(secTimer); clearTimeout(quietTimer);
+  var f = $('#player iframe');
+  if (f) f.remove();
+  $('#player').hidden = true;
+  P = null;
+}
+// 播放器在 B 站的 iframe 里，看不到真实进度，只能按时间估：
+// 看了七成就记为看完；放够时长（再多等 8 秒）就自动下一条——成长路线到一关结尾就停，不连着刷下一关
+function secTick() {
+  if (!P || P.paused || document.hidden) return;
+  var v = P.list[P.idx];
+  P.elapsed++;
+  if (!v.duration) return;
+  if (!P.marked && !isDone(v.id) && P.elapsed >= v.duration * 0.7) { P.marked = true; setDone(v.id, true); toast('✓ 记为看完了'); }
+  if (isSeries(v) || P.elapsed < v.duration + 8) return;
+  var nx = P.list[P.idx + 1];
+  if (!nx) { P.paused = true; toast('这个列表看完了，按返回回首页', 6000); return; }
+  if (P.path && stageOf(nx) !== stageOf(v)) {
+    P.paused = true;
+    toast('🎉 第 ' + stageOf(v).no + ' 关看完了！休息一下，做做这一关的动手任务', 8000);
+    return;
+  }
+  go(1);
+}
+function go(d) {
+  var i = P.idx + d;
+  if (i < 0) { toast('已经是第一条了'); return; }
+  if (i >= P.list.length) { toast('已经是最后一条了'); return; }
+  P.idx = i;
+  showVideo(450);
+}
+function wake(ms) {
+  var p = $('#player');
+  p.classList.remove('quiet');
+  clearTimeout(quietTimer);
+  if (!P || !P.paused) quietTimer = setTimeout(function () { p.classList.add('quiet'); }, ms || 3500);
+}
+
+// 选集
+var strip = {open: false, c: 0, x: 0};
+function openStrip() {
+  var track = $('#strip-track');
+  $('#strip-name').textContent = P.name;
+  $('#strip-count').textContent = P.list.length + ' 条，看过 ' + doneCount(P.list) + ' 条';
+  track.innerHTML = P.list.map(function (v, i) { return cardHTML(v, i, P.path); }).join('');
+  lazyImages(track);
+  strip.open = true;
+  $('#strip').classList.add('open');
+  $('#player').classList.remove('quiet');
+  clearTimeout(quietTimer);
+  stripFocus(P.idx);
+}
+function closeStrip() {
+  strip.open = false;
+  $('#strip').classList.remove('open');
+}
+function stripFocus(c) {
+  var track = $('#strip-track'), cards = track.children;
+  c = Math.max(0, Math.min(c, cards.length - 1));
+  var old = track.querySelectorAll('.f');
+  [].forEach.call(old, function (e) { e.classList.remove('f'); });
+  strip.c = c;
+  var el = cards[c];
+  el.classList.add('f'); el.querySelector('.tile').classList.add('f');
+  var step = el.offsetWidth + parseFloat(getComputedStyle(el).marginRight);
+  var maxX = Math.max(0, cards.length * step - (track.parentNode.offsetWidth - 2 * track.offsetLeft));
+  strip.x = Math.max(0, Math.min(maxX, (c - 2) * step));
+  track.style.transform = 'translateX(' + (-strip.x) + 'px)';
+}
+
+function playerKey(k) {
+  if (strip.open) {
+    if (k === 'left') stripFocus(strip.c - 1);
+    else if (k === 'right') stripFocus(strip.c + 1);
+    else if (k === 'ok') { closeStrip(); if (strip.c !== P.idx) { P.idx = strip.c; showVideo(0); } else wake(); }
+    else if (k === 'up' || k === 'back' || k === 'menu') { closeStrip(); wake(); }
+    return;
+  }
+  if (k === 'left' || k === 'prev') { go(-1); return; }
+  if (k === 'right' || k === 'next') { go(1); return; }
+  if (k === 'down' || k === 'menu') { openStrip(); return; }
+  if (k === 'up') {
+    var v = P.list[P.idx], on = !isDone(v.id);
+    setDone(v.id, on);
+    P.marked = true;
+    var st = P.path && stageOf(v);
+    toast(on ? (st ? '✓ 看完了 · 第 ' + st.no + ' 关 ' + doneCount(st.vids) + ' / ' + st.vids.length : '✓ 记下了') : '已取消「看完了」');
+    showInfoOnly();
+    return;
+  }
+  if (k === 'ok' || k === 'playpause') {
+    P.paused = !P.paused;
+    $('#player').classList.toggle('is-paused', P.paused);
+    wake();
+    // 应用里由安卓那边往播放器里按一下空格；普通浏览器里做不到（跨域 iframe），只能提示
+    if (IN_APP) { var f = $('#player iframe'); if (f) f.focus(); return 'space'; }
+    toast('请用播放器自己的按钮暂停');
+    return;
+  }
+  if (k === 'back') {
+    var cur = P.list[P.idx];
+    stopPlayer();
+    renderHome();
+    focusVideo(cur);
+    return;
+  }
+  wake();
+}
+function showInfoOnly() {
+  var v = P.list[P.idx];
+  $('#p-who').textContent = $('#p-who').textContent.replace(/ · ✓ 看过$/, '') + (isDone(v.id) ? ' · ✓ 看过' : '');
+  wake();
+}
+// 从播放回来：焦点落在刚才看的那条上
+function focusVideo(v) {
+  var r = focus.r;
+  if (r > 0) {
+    var i = rows[r].list.indexOf(v);
+    if (i >= 0) { cleanFocus(); setFocus(r, i, true); return; }
+  }
+  for (var k = 1; k < rows.length; k++) {
+    var j = rows[k].list.indexOf(v);
+    if (j >= 0 && (rows[k].path === !!pathInfo[v.id])) { cleanFocus(); setFocus(k, j, true); return; }
+  }
+}
+
+// ---------- 按键 ----------
+// 安卓应用把遥控器按键转成 tvKey('left' | 'right' | 'up' | 'down' | 'ok' | 'back' | 'menu' | 'playpause' | 'next' | 'prev')，
+// 返回 'exit' 让应用退出，返回 'space' 让应用往播放器里按一下空格（暂停/继续）。
+window.tvKey = function (k) {
+  if (!D) return k === 'back' ? 'exit' : '';
+  var r = P ? playerKey(k) : homeKey(k);
+  return r || '';
+};
+var KEYMAP = {ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', Enter: 'ok', ' ': 'ok', Escape: 'back', Backspace: 'back', ContextMenu: 'menu',
+  MediaPlayPause: 'playpause', MediaTrackNext: 'next', MediaTrackPrevious: 'prev', Left: 'left', Right: 'right', Up: 'up', Down: 'down', Esc: 'back'};
+document.addEventListener('keydown', function (e) {
+  var k = KEYMAP[e.key];
+  if (!k) return;
+  e.preventDefault();
+  tvKey(k);
+});
+// 播放器 iframe 抢走焦点时（比如用鼠标点了它），把焦点要回来，方向键才不会被它吃掉
+window.addEventListener('blur', function () { if (!IN_APP) setTimeout(function () { window.focus(); }, 0); });
+
+// ---------- 启动 ----------
+tick();
+setInterval(tick, 15000);
+loadData().then(function (data) {
+  prepare(data);
+  $('#sub').textContent = (D.path && D.path.title ? D.path.title + ' · ' : '') + '电视版';
+  $('#msg').hidden = true;
+  renderHome();
+}).catch(function () {
+  $('#msg').innerHTML = '<b>没加载出来</b>检查一下网络，按 OK 重试';
+  window.tvKey = function (k) { if (k === 'ok') location.reload(); return k === 'back' ? 'exit' : ''; };
+});
+</script>
+</body>
+</html>

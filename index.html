@@ -355,6 +355,51 @@ body.tv .tv-bar{position:fixed;left:0;right:0;bottom:0;height:60px;z-index:61;di
   .info{height:100%;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* ---------- 老浏览器兜底 ----------
+   电视、投影仪、老平板自带的浏览器内核常常停在几年前（比如极米投影仪是 Chrome 66），
+   不认识的写法整条作废：没有 aspect-ratio 视频框高度变成 0，没有 inset 播放器不铺满。
+   新浏览器不会进这些 @supports 块，看到的还是上面的样式。 */
+@supports not (aspect-ratio:1/1){
+  .hero-cover,.thumb,.mini{height:0;padding-top:56.25%}
+  .player{width:100%;height:0;padding-top:56.25%}
+  body.tv .slide.active .player{height:calc(100vh - 60px);padding-top:0}
+  .hero-cover img,.thumb img,.poster img,.mini img,.player iframe,.poster,.sheet,.sheet-bg,body.tv .watch{top:0;right:0;bottom:0;left:0}
+  .ring::before{top:4px;right:4px;bottom:4px;left:4px}
+  .hero h1{font-size:26px}
+  .page h1{font-size:32px}
+  .sheet-panel{width:420px;max-width:100%}
+  .toast{max-width:460px}
+}
+@supports not (bottom:env(safe-area-inset-bottom)){
+  .watch{bottom:var(--tabs-h)}
+  .toast{bottom:calc(var(--tabs-h) + 18px)}
+}
+@supports not (translate:0){
+  .playdot{transform:translate(-50%,-50%)}
+  .toast{transform:translate(-50%,20px)}
+  .toast.show{transform:translate(-50%,0)}
+}
+@supports not (height:1dvh){
+  body.tv .slide.active .player{height:calc(100vh - 60px)}
+  @media(max-width:760px){.sheet-panel{max-height:78vh}}
+}
+@supports not (color:color-mix(in srgb,red,red)){
+  .stage-pill{background:var(--soft);color:var(--h)}
+  .top,.tabs{background:var(--surface)}
+  .chips{background:var(--bg)}
+  .trail{background:var(--bg)}
+  .hero-cover,.thumb{background:var(--soft)}
+  .tag.warn,.kid.pick{background:#fff1c7}
+  .kid.go{background:#dcf3e8}
+  .kid.interest,.q.on{background:#dcecf8}
+  :root.dark .tag.warn,:root.dark .kid.pick{background:#3a3220}
+  :root.dark .kid.go{background:#1c3a30}
+  :root.dark .kid.interest,:root.dark .q.on{background:#1d3448}
+  .pstage-no,.mission b,.sheet-stage{color:var(--h)}
+  .mission{border-color:var(--line);background:var(--surface)}
+  .why{background:var(--bg)}
+}
 </style>
 </head>
 <body>
@@ -397,7 +442,8 @@ body.tv .tv-bar{position:fixed;left:0;right:0;bottom:0;height:60px;z-index:61;di
       <ul>
         <li><strong>电脑</strong>：用滚轮，或者按 <kbd>J</kbd> <kbd>K</kbd> 切换上一条下一条，切过去就自动带声音播放。快捷键：<kbd>A</kbd> 开关自动播放，<kbd>L</kbd> 播放列表，<kbd>H</kbd> 去 B 站看高清，<kbd>D</kbd> 深色模式。</li>
         <li><strong>手机、平板</strong>：往上滑是下一条，往下滑是上一条。滑到以后播放器已经加载好，但 B 站在手机和平板上用的播放器不会自己开播，要点一下画面才开始，这是 B 站的规定，网页改不了。手机横过来，视频在左边，说明在右边。</li>
-        <li><strong>电视、投屏</strong>：在电脑上按 <kbd>T</kbd> 或点「大屏模式」，只留视频和一条控制栏，<kbd>←</kbd> <kbd>→</kbd> 切换，<kbd>Esc</kbd> 退出。</li>
+        <li><strong>电视、投影仪</strong>：用遥控器的打开<a href="tv.html"><strong>电视版</strong></a>：一格一格的方块，方向键挑、<kbd>OK</kbd> 播放；播放时 <kbd>◀</kbd> <kbd>▶</kbd> 换一条，<kbd>▲</kbd> 标记看完，<kbd>▼</kbd> 选集，返回键回首页。看完的进度和这里共用。安卓电视、投影仪可以装 BiliPicks 电视版应用（安装方法见<a href="https://github.com/limin112/bilipicks/tree/main/android" target="_blank" rel="noopener noreferrer">开源仓库</a>），打开就是电视版，<kbd>OK</kbd> 键还能暂停。</li>
+        <li><strong>电脑接电视、投屏</strong>：在电脑上按 <kbd>T</kbd> 或点「大屏模式」，只留视频和一条控制栏，<kbd>←</kbd> <kbd>→</kbd> 切换，<kbd>Esc</kbd> 退出。</li>
         <li><strong>换设备</strong>：看完的进度、动手任务的勾、自动播放和深色模式的设置，都只存在这台设备的浏览器里，换设备不同步，清除浏览数据会丢。</li>
       </ul>
       <h2 class="sec">关于搬运的视频</h2>
@@ -461,9 +507,9 @@ body.tv .tv-bar{position:fixed;left:0;right:0;bottom:0;height:60px;z-index:61;di
 <script>
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const store = {
-  get(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; } },
+  get(k, fallback) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fallback : v; } catch { return fallback; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
 
@@ -501,7 +547,8 @@ function toggleDone(id) {
 }
 
 // ---------- 成长路线 ----------
-const byId = Object.fromEntries(DATA.videos.map(v => [v.id, v]));
+const byId = {};
+DATA.videos.forEach(v => { byId[v.id] = v; });
 const PATH = DATA.path || {stages: []};
 const pathInfo = {};   // id -> {stage, step, note}
 const pathItems = [];  // 按顺序展开，跳过失效视频
@@ -824,7 +871,8 @@ function mount(slide, v, autoplay) {
   f.allowFullscreen = true;
   f.referrerPolicy = 'no-referrer-when-downgrade';
   f.src = embedUrl(v, autoplay);
-  box.replaceChildren(f);
+  box.innerHTML = '';
+  box.appendChild(f);
 }
 function unmount(slide) {
   const box = $('.player', slide);
@@ -863,7 +911,7 @@ function activate(i, play, swiped = false) {
   slide.classList.add('active');
   if (play || state.tv) mount(slide, v, true);
   else if (swiped && autoplay && state.view === 'watch') autoMount(slide);
-  else if (state.view === 'watch' && $('#sheet').hidden) $('.poster', slide)?.focus({preventScroll: true});
+  else if (state.view === 'watch' && $('#sheet').hidden) { const p = $('.poster', slide); if (p) p.focus({preventScroll: true}); }
   $('#feed-pos').textContent = `${i + 1} / ${feedList.length}`;
   $('#tv-title').textContent = v.title;
   $('#tv-hd').href = v.url;
@@ -1011,7 +1059,7 @@ function go(view, {push = true, restore = false, id, arg} = {}) {
     if (state.view !== 'watch') state.from = state.view;
     prepareWatch(id);
   } else {
-    feed.replaceChildren(); // 离开播放页就停掉视频
+    feed.innerHTML = ''; // 离开播放页就停掉视频
   }
   state.view = view;
   if (push) history.pushState(null, '', view === 'home' ? location.pathname + location.search : '#' + view);

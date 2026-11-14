@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.minlibuilds.bilipicks" android:versionCode="2" android:versionName="1.0">
+  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <!-- 电视、投影仪：不需要触摸屏；能出现在 Android TV 的桌面上。
+       usesCleartextTraffic：开发时要打开局域网里的 http 地址（MainActivity.allowed 只放行自己网站和局域网） -->
+  <uses-feature android:name="android.software.leanback" android:required="false"/>
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+  <application android:label="BiliPicks" android:icon="@mipmap/ic_launcher"
+      android:banner="@drawable/banner" android:hardwareAccelerated="true"
+      android:allowBackup="true" android:usesCleartextTraffic="true" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+    <activity android:name=".MainActivity" android:screenOrientation="landscape" android:launchMode="singleTask"
+        android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+        <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>
