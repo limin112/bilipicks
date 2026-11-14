@@ -19,7 +19,7 @@
 | `tv.html` | 电视版：遥控器界面，数据也读 `data.js` |
 | `data.js` | 所有内容：视频、成长路线、频道榜、策展人信息 |
 | `update.py` | 维护脚本：检查失效视频、补封面和时长、添加新视频（只用 Python 标准库） |
-| `android/` | 可选：安卓电视 / 投影仪应用（全屏打开 `tv.html`，遥控器按键交给页面），见 [android/README.md](android/README.md) |
+| `android/` | 可选：安卓电视 / 投影仪应用（全屏打开 `tv.html`，遥控器按键交给页面）。不提供安装包，clone 下来自己构建、自己装，见 [android/README.md](android/README.md) |
 
 ## 做一个你自己的版本
 

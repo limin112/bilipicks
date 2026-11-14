@@ -2,6 +2,8 @@
 
 一个很小的安卓应用（约 130KB）：全屏打开 BiliPicks 的电视版页面 `tv.html`，用遥控器操作。在极米 H3S（安卓 9，内核 Chrome 66）上实测过。
 
+这是个研究和自用的项目，**不提供现成的安装包**。欢迎 clone 下来自己构建、自己装，也欢迎按自家的需要改：换成你自己的清单网站、换图标、改遥控器的按键。整个应用就一个 Java 文件，不需要 Android Studio。
+
 - 打开就是电视版：上面是「豆腐块」（继续闯关、9 关、随便看看），下面一排一排是各关和各分类的视频。
 - 遥控器：方向键挑，OK 播放；播放时 ◀ ▶ 换一条，OK 暂停 / 继续，▲ 标记看完，▼ 选集，返回键回首页；首页连按两次返回退出。
 - 打开视频直接开播，不用先点一下画面。
@@ -46,7 +48,6 @@ DEVICE=192.168.0.106:5555 ./build.sh install
 
 ## 几个坑（都已经处理了）
 
-- **B 站播放器在安卓 UA 下播不了**：嵌入播放器看到安卓 UA 会退回 mp4 直链，B 站 CDN 返回 403。应用把 UA 设成电脑版 Chrome，播放器就走 DASH，能正常播。UA 末尾带 `BiliPicksTV/1`，页面靠它知道自己在应用里。
 - **老 WebView 的视频封面**：设置了 `WebChromeClient` 之后，页面里一出现 `<video>`，老 WebView 会因为默认封面是 null 而崩。`getDefaultVideoPoster()` 返回一个 1×1 的图。
 - **d8 编译崩溃**：JDK 21 的 javac 会给非静态内部类的构造器、泛型桥接方法写出没有名字的 `MethodParameters`，build-tools 34 的 d8 读到就 NullPointerException。所以代码里只用静态内部类，`ValueCallback` 不带泛型。
 - **暂停**：B 站播放器在跨域 iframe 里，网页没法直接控制。页面把焦点给 iframe 后返回 `"space"`，应用往 WebView 里补按一个空格键。
