@@ -4,3 +4,4 @@ build/
 *.idsig
 *.keystore
 *.jks
+.site_dir

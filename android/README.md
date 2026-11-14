@@ -6,7 +6,7 @@
 
 ## 直接下载安装包
 
-[**BiliPicks-tv.apk**](https://github.com/limin112/bilipicks/raw/main/android/release/BiliPicks-tv.apk)（最新版，约 80KB，安卓 5.0 以上，打开的是 <https://minlibuilds.com/bili/tv.html>）。国内下载 GitHub 慢的话，网站上也有一份：<https://minlibuilds.com/bili/BiliPicks-tv.apk>。版本号和 SHA-256 见 [release/tv-app.json](release/tv-app.json)。
+[**BiliPicks-tv.apk**](https://minlibuilds.com/bili/BiliPicks-tv.apk)（最新版，约 80KB，安卓 5.0 以上，打开的是 <https://minlibuilds.com/bili/tv.html>）。放在网站上，国内不挂代理也能下；GitHub 上的 [release/BiliPicks-tv.apk](release/BiliPicks-tv.apk) 是同一个文件。版本号和 SHA-256 见 [release/tv-app.json](release/tv-app.json)。
 
 - 先在电视的设置里打开「允许安装未知来源应用」，再用 U 盘拷过去，在文件管理器里点开安装；或者用下面的 adb 方法：`adb install -r BiliPicks-tv.apk`。
 - 只能用遥控器操作（方向键、OK、返回），所以适合电视、投影仪、电视盒子，不适合手机平板。
@@ -56,7 +56,7 @@ DEVICE=192.168.0.106:5555 ./build.sh install
 ## 发布新版（应用内更新读的就是这个）
 
 1. 把 `AndroidManifest.xml` 里的 `versionCode` 加 1，`versionName` 改成新版本号。
-2. 运行 `SITE_DIR=放tv.html的目录 ./release.sh "这一版改了什么"`：构建，写出 `release/BiliPicks-tv.apk` 和 `release/tv-app.json`（版本号、SHA-256、更新说明），再复制一份到网站目录。
+2. 运行 `SITE_DIR=放tv.html的目录 ./release.sh "这一版改了什么"`：构建，写出 `release/BiliPicks-tv.apk` 和 `release/tv-app.json`（版本号、SHA-256、更新说明），再复制一份到网站目录。电视一般不挂代理、连不上 GitHub，应用内更新只从网站下载，所以**每次都要复制到网站**。`SITE_DIR` 可以写进 `android/.site_dir`（不进仓库），以后直接 `./release.sh "…"`。
 3. 提交、上线网站。电视上按「检查更新」就能装上。
 
 应用只认和 `tv.html` 同一个网站、同一个目录下的 `tv-app.json`，下载后要核对 SHA-256、包名和签名，都对上才交给系统安装。
