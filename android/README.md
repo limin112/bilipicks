@@ -1,20 +1,19 @@
 # BiliPicks 电视版应用（安卓电视 / 投影仪）
 
-一个很小的安卓应用（约 130KB）：全屏打开 BiliPicks 的电视版页面 `tv.html`，用遥控器操作。在极米 H3S（安卓 9，内核 Chrome 66）上实测过。
+一个很小的安卓应用（约 80KB）：全屏打开 BiliPicks 的电视版页面 `tv.html`，用遥控器操作。在极米 H3S（安卓 9，内核 Chrome 66）上实测过。
 
-这是个研究和自用的项目。想直接试，可以下载打好的安装包；更欢迎 clone 下来自己构建、自己装，按自家的需要改：换成你自己的清单网站、换图标、改遥控器的按键。整个应用就一个 Java 文件，不需要 Android Studio。
+这是个研究和自用的项目。想直接试，可以下载打好的安装包；更欢迎 clone 下来自己构建、自己装，按自家的需要改：换成你自己的清单网站、换图标、改遥控器的按键。整个应用就几个 Java 文件，不需要 Android Studio。
 
 ## 直接下载安装包
 
-[**BiliPicks-tv-1.1.apk**](https://github.com/limin112/bilipicks/raw/main/android/release/BiliPicks-tv-1.1.apk)（70KB，安卓 5.0 以上，打开的是 <https://minlibuilds.com/bili/tv.html>）
+[**BiliPicks-tv.apk**](https://github.com/limin112/bilipicks/raw/main/android/release/BiliPicks-tv.apk)（最新版，约 80KB，安卓 5.0 以上，打开的是 <https://minlibuilds.com/bili/tv.html>）。国内下载 GitHub 慢的话，网站上也有一份：<https://minlibuilds.com/bili/BiliPicks-tv.apk>。版本号和 SHA-256 见 [release/tv-app.json](release/tv-app.json)。
 
-SHA-256：`7c9b06e08f45ae0e81609af2435e10a012dd9c03dddff669d5d781aac3daf195`
-
-- 先在电视的设置里打开「允许安装未知来源应用」，再用 U 盘拷过去，在文件管理器里点开安装；或者用下面的 adb 方法：`adb install BiliPicks-tv-1.1.apk`。
+- 先在电视的设置里打开「允许安装未知来源应用」，再用 U 盘拷过去，在文件管理器里点开安装；或者用下面的 adb 方法：`adb install -r BiliPicks-tv.apk`。
 - 只能用遥控器操作（方向键、OK、返回），所以适合电视、投影仪、电视盒子，不适合手机平板。
 - 网站上的视频清单更新了，电视上直接就是新的，不用重装。
 - 以后自己构建的版本签名不一样，装之前要先卸载这个。
-- 版本：1.1 加了快进 / 快退（◀ ▶），换视频改用 ▼ 选集；1.0 的 ◀ ▶ 是换上一条 / 下一条。装了 1.0 的直接覆盖安装 1.1，看完进度不会丢。
+- **以后不用再拷 U 盘**：1.2 起，电视版主页右上角有「检查更新」（方向键从上面的方块再往上走），有新版时会亮起来，按 OK 自动下载、核对，然后系统弹出确认框，选「安装」就行。第一次可能要在弹出的设置里允许 BiliPicks「安装未知应用」。装完如果回到了桌面（极米会这样），再打开一次就是新版。
+- 版本：1.2 加了一键更新，修了快进一下跳好几次；1.1 加了快进 / 快退（◀ ▶），换视频改用 ▼ 选集；1.0 的 ◀ ▶ 是换上一条 / 下一条。1.0、1.1 要手动覆盖安装一次 1.2，看完进度不会丢。
 
 - 打开就是电视版：上面是「豆腐块」（继续闯关、9 关、随便看看），下面一排一排是各关和各分类的视频。
 - 遥控器：方向键挑，OK 播放；播放时 ◀ ▶ 快退 / 快进（一下 5 秒，按住连续），OK 暂停 / 继续，▲ 标记看完，▼ 选集（换一条），返回键回首页；首页连按两次返回退出。遥控器上有上一曲 / 下一曲键的，也能直接换。
@@ -54,15 +53,23 @@ DEVICE=192.168.0.106:5555 ./build.sh install
 
 签名钥匙默认放在 `~/.android/bilipicks-tv.keystore`（第一次构建时自动生成，不进仓库）。**以后升级要用同一把钥匙**，换了钥匙要先在电视上卸载旧版。
 
+## 发布新版（应用内更新读的就是这个）
+
+1. 把 `AndroidManifest.xml` 里的 `versionCode` 加 1，`versionName` 改成新版本号。
+2. 运行 `SITE_DIR=放tv.html的目录 ./release.sh "这一版改了什么"`：构建，写出 `release/BiliPicks-tv.apk` 和 `release/tv-app.json`（版本号、SHA-256、更新说明），再复制一份到网站目录。
+3. 提交、上线网站。电视上按「检查更新」就能装上。
+
+应用只认和 `tv.html` 同一个网站、同一个目录下的 `tv-app.json`，下载后要核对 SHA-256、包名和签名，都对上才交给系统安装。
+
 ## 改成你自己的网站
 
-改 `src/com/minlibuilds/bilipicks/MainActivity.java` 里的 `HOME`（电视版地址）和 `SITE_HOST`（允许跳转的域名），重新构建。图标在 `res/`，用 `python3 tools/make_icons.py` 生成（需要 Pillow）。
+改 `src/com/minlibuilds/bilipicks/MainActivity.java` 里的 `HOME`（电视版地址）和 `SITE_HOST`（允许跳转的域名），重新构建。一键更新会去 `HOME` 同目录下找 `tv-app.json`，用上面的 `release.sh` 生成。图标在 `res/`，用 `python3 tools/make_icons.py` 生成（需要 Pillow）。
 
 ## 几个坑（都已经处理了）
 
 - **老 WebView 的视频封面**：设置了 `WebChromeClient` 之后，页面里一出现 `<video>`，老 WebView 会因为默认封面是 null 而崩。`getDefaultVideoPoster()` 返回一个 1×1 的图。
 - **d8 编译崩溃**：JDK 21 的 javac 会给非静态内部类的构造器、泛型桥接方法写出没有名字的 `MethodParameters`，build-tools 34 的 d8 读到就 NullPointerException。所以代码里只用静态内部类，`ValueCallback` 不带泛型。
-- **暂停**：B 站播放器在跨域 iframe 里，网页没法直接控制。页面把焦点给 iframe 后返回 `"space"`，应用往 WebView 里补按一个空格键。
+- **暂停、快进**：B 站播放器在跨域 iframe 里，网页没法直接控制。页面把焦点给 iframe 后返回 `"space"` / `"seek+"` / `"seek-"`，应用往 WebView 里补按空格 / → / ←（B 站播放器自己的快捷键，方向键一下 5 秒）。播放器处理完方向键不吃掉它，老 WebView 会把这个键再交回 Activity，所以补按的键带一个扫描码记号，回来时认出来丢掉，不然快进一下会转好几圈。
 
 ## 调试
 
