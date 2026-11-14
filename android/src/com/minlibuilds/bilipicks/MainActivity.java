@@ -24,7 +24,7 @@ import android.widget.FrameLayout;
  *
  * 遥控器按键不直接交给网页，而是转成 tvKey('left' / 'ok' / 'back' …) 调页面里的函数：
  * 这样焦点永远不会掉进 B 站播放器的 iframe 里，孩子也点不到播放器里的推荐视频。
- * 页面返回 "exit" 就退出应用，返回 "space" 就往播放器里按一下空格（暂停 / 继续）。
+ * 页面返回 "exit" 就退出应用，返回 "space" / "seek+" / "seek-" 就往播放器里按一下空格 / → / ←（暂停、快进、快退）。
  */
 public class MainActivity extends Activity {
     static final String HOME = "https://minlibuilds.com/bili/tv.html";
@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
     // 用安卓 UA 时 B 站嵌入播放器会退回 mp4 直链，CDN 返回 403；用电脑 UA 它会走 DASH，能正常播。
     // 末尾的 BiliPicksTV 让页面知道自己在应用里。
     static final String UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            + "(KHTML, like Gecko) Chrome/66.0.3359.158 Safari/537.36 BiliPicksTV/1";
+            + "(KHTML, like Gecko) Chrome/66.0.3359.158 Safari/537.36 BiliPicksTV/2";
 
     WebView web;
     FrameLayout root;
@@ -129,7 +129,11 @@ public class MainActivity extends Activity {
             if ("\"exit\"".equals(r)) {
                 a.finish();
             } else if ("\"space\"".equals(r)) {
-                a.pressSpace();
+                a.pressKey(KeyEvent.KEYCODE_SPACE);
+            } else if ("\"seek+\"".equals(r)) {
+                a.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+            } else if ("\"seek-\"".equals(r)) {
+                a.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
             } else if (noTv && "back".equals(key)) {
                 if (a.web.canGoBack()) a.web.goBack(); else a.finish();
             } else if (noTv) {
@@ -139,11 +143,14 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** 页面已经把焦点放到播放器 iframe 上，这里补一下空格：B 站播放器用空格暂停 / 继续 */
-    void pressSpace() {
+    /**
+     * 页面已经把焦点放到播放器 iframe 上，这里往 WebView 里补按一个键（不经过上面的 dispatchKeyEvent）：
+     * 空格 = 暂停 / 继续，→ / ← = 快进 / 快退 5 秒。这是 B 站播放器自己的键盘快捷键。
+     */
+    void pressKey(int code) {
         long t = SystemClock.uptimeMillis();
-        web.dispatchKeyEvent(new KeyEvent(t, t, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SPACE, 0));
-        web.dispatchKeyEvent(new KeyEvent(t, t + 30, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE, 0));
+        web.dispatchKeyEvent(new KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0));
+        web.dispatchKeyEvent(new KeyEvent(t, t + 30, KeyEvent.ACTION_UP, code, 0));
     }
 
     // ---------- 网页 ----------

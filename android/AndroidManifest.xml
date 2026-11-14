@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.minlibuilds.bilipicks" android:versionCode="2" android:versionName="1.0">
+    package="com.minlibuilds.bilipicks" android:versionCode="3" android:versionName="1.1">
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28"/>
   <uses-permission android:name="android.permission.INTERNET"/>
   <!-- 电视、投影仪：不需要触摸屏；能出现在 Android TV 的桌面上。

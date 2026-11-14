@@ -97,6 +97,7 @@ h1,h2,h3,p{margin:0}
 .ov .pos{position:absolute;right:3.5rem;top:2.4rem;font-size:1.1rem;font-weight:700;color:#c3cede}
 .keys{display:flex;flex-wrap:wrap;align-items:center;font-size:.95rem;color:#d5deeb}
 .keys span{display:inline-flex;align-items:center;margin-right:2rem}
+.keys b{font-weight:inherit}
 .keys kbd{display:inline-block;min-width:2rem;padding:.1rem .5rem;margin-right:.5rem;border-radius:.45rem;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);font:inherit;font-weight:800;text-align:center}
 .paused{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;padding:1rem 2rem;border-radius:1rem;background:rgba(0,0,0,.7);font-size:1.4rem;font-weight:800;display:none}
 .player.is-paused .paused{display:block}
@@ -133,11 +134,10 @@ h1,h2,h3,p{margin:0}
   </div>
   <div class="ov bot-ov">
     <div class="keys">
-      <span><kbd>◀</kbd>上一条</span>
+      <span><kbd>◀</kbd><kbd>▶</kbd><b id="k-lr">上一条 / 下一条</b></span>
       <span><kbd>OK</kbd>暂停 / 继续</span>
-      <span><kbd>▶</kbd>下一条</span>
       <span><kbd>▲</kbd>标记看完</span>
-      <span><kbd>▼</kbd>选集</span>
+      <span><kbd>▼</kbd><b id="k-down">选集</b></span>
       <span><kbd>返回</kbd>回首页</span>
     </div>
   </div>
@@ -164,7 +164,12 @@ function setDone(id, on) { if (on) done[id] = Date.now(); else delete done[id]; 
 
 var HUES = ['#e9558a', '#f07c2a', '#d49a00', '#2fa866', '#0f9fa3', '#2f86e0', '#6b6ff0', '#a05bd8', '#cf4f9a'];
 var HUES2 = ['#a8326a', '#b84f12', '#9a6c00', '#1d7446', '#0a6e72', '#1d5ea8', '#4447b8', '#7036a3', '#93306c'];
-var IN_APP = /BiliPicksTV/.test(navigator.userAgent);  // 在 BiliPicks 安卓应用里（遥控器键由应用转过来）
+// 在 BiliPicks 安卓应用里时，UA 末尾是 BiliPicksTV/版本号，遥控器键由应用转过来
+var APP_VER = +((navigator.userAgent.match(/BiliPicksTV\/(\d+)/) || [])[1] || 0);
+var IN_APP = APP_VER > 0;
+// 应用 1.1（UA 版本 2）起，能往播放器里补按方向键，◀ ▶ 就是快退 / 快进；旧版应用和普通浏览器里 ◀ ▶ 还是换上一条 / 下一条
+var CAN_SEEK = APP_VER >= 2;
+var SEEK_STEP = 5;  // B 站播放器按一下方向键跳 5 秒
 
 function mins(sec) {
   if (!sec) return '';
@@ -508,8 +513,13 @@ function playerKey(k) {
     else if (k === 'up' || k === 'back' || k === 'menu') { closeStrip(); wake(); }
     return;
   }
-  if (k === 'left' || k === 'prev') { go(-1); return; }
-  if (k === 'right' || k === 'next') { go(1); return; }
+  if (k === 'prev') { go(-1); return; }
+  if (k === 'next') { go(1); return; }
+  if (k === 'left' || k === 'right') {
+    var dir = k === 'right' ? 1 : -1;
+    if (!CAN_SEEK) { go(dir); return; }
+    return seek(dir);
+  }
   if (k === 'down' || k === 'menu') { openStrip(); return; }
   if (k === 'up') {
     var v = P.list[P.idx], on = !isDone(v.id);
@@ -538,6 +548,19 @@ function playerKey(k) {
   }
   wake();
 }
+// 快进 / 快退：焦点给播放器 iframe，让应用往里补按一下方向键（B 站播放器一下 5 秒）。
+// 连着按会累计显示「快进 30 秒」；估算的已看时长也跟着挪，不然自动记看完、自动下一条会错位
+var seekAcc = 0, seekTimer;
+function seek(dir) {
+  if (!$('#player iframe')) return;
+  seekAcc += dir * SEEK_STEP;
+  clearTimeout(seekTimer);
+  seekTimer = setTimeout(function () { seekAcc = 0; }, 1500);
+  P.elapsed = Math.max(0, P.elapsed + dir * SEEK_STEP);
+  toast((seekAcc >= 0 ? '⏩ 快进 ' : '⏪ 快退 ') + Math.abs(seekAcc) + ' 秒', 1200);
+  $('#player iframe').focus();
+  return dir > 0 ? 'seek+' : 'seek-';
+}
 function showInfoOnly() {
   var v = P.list[P.idx];
   $('#p-who').textContent = $('#p-who').textContent.replace(/ · ✓ 看过$/, '') + (isDone(v.id) ? ' · ✓ 看过' : '');
@@ -558,7 +581,8 @@ function focusVideo(v) {
 
 // ---------- 按键 ----------
 // 安卓应用把遥控器按键转成 tvKey('left' | 'right' | 'up' | 'down' | 'ok' | 'back' | 'menu' | 'playpause' | 'next' | 'prev')，
-// 返回 'exit' 让应用退出，返回 'space' 让应用往播放器里按一下空格（暂停/继续）。
+// 返回 'exit' 让应用退出，返回 'space' 让应用往播放器里按一下空格（暂停/继续），
+// 返回 'seek+' / 'seek-' 让应用往播放器里按一下 → / ←（快进 / 快退）。
 window.tvKey = function (k) {
   if (!D) return k === 'back' ? 'exit' : '';
   var r = P ? playerKey(k) : homeKey(k);
@@ -578,6 +602,7 @@ window.addEventListener('blur', function () { if (!IN_APP) setTimeout(function (
 // ---------- 启动 ----------
 tick();
 setInterval(tick, 15000);
+if (CAN_SEEK) { $('#k-lr').textContent = '快退 / 快进'; $('#k-down').textContent = '选集 · 换一条'; }
 loadData().then(function (data) {
   prepare(data);
   $('#sub').textContent = (D.path && D.path.title ? D.path.title + ' · ' : '') + '电视版';
