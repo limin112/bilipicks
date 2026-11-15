@@ -4,6 +4,8 @@
 
 **Demo：<https://minlibuilds.com/bili/>** · 电视版：<https://minlibuilds.com/bili/tv.html> · 安卓电视 / 投影仪安装包：[BiliPicks-tv.apk](https://minlibuilds.com/bili/BiliPicks-tv.apk)
 
+另有一份零基础民谣吉他路线，文件在 [`guitar/`](guitar/)（打开 `guitar/index.html`）。和上面这份课分开，浏览器里的看完进度也分开记。可以以后部署在同一站点的 `/guitar/`。刷新封面和时长：`python3 update.py --file guitar/data.js`。
+
 为什么做、怎么做的，见这篇文章：[给娃做了一个像短剧「系统」一样的学习成长系统](https://x.com/MinLiBuilds/status/2121538740011086306)。
 
 - **成长路线**：闯关式的学习路线（示例数据是「从零到深度学习」9 关 49 步），每关配一个动手任务。看完一条点「✓ 看完了」，进度存在本机浏览器里。
@@ -78,6 +80,7 @@ python3 update.py add BV1xxxxxxxxx --cat 数学 --age 10 --reason "为什么推�
 python3 update.py            # 检查失效视频、刷新封面/时长/粉丝数，写回 data.js
 python3 update.py --check    # 只出报告，不改文件
 python3 update.py --deploy   # 刷新后 git commit + push
+python3 update.py --file guitar/data.js   # 只刷新吉他清单，不动根目录这份
 ```
 
 失效的视频会被标记为 `dead`，页面自动隐藏；恢复了会自动重新显示。标题变化只提示、不覆盖，因为标题可能是你手动改短过的。

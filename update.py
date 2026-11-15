@@ -8,6 +8,8 @@
   python3 update.py --check         只检查、出报告，不改文件
   python3 update.py --deploy        刷新后 git 提交并推送（托管在 GitHub Pages / Cloudflare Pages 时会自动上线）
   python3 update.py --skip-tiers    刷新时跳过频道榜（少发几十个请求）
+  python3 update.py --file guitar/data.js
+                                    读写另一份清单（默认仍是仓库根目录的 data.js）
 
   python3 update.py add BV1xxxxxxxxx --cat 数学 --age 10 --reason "推荐理由" \
       [--caution "家长提示"] [--page 2] [--stage 3 --note "在成长路线里的说明"] \
@@ -23,11 +25,13 @@
 import argparse
 import datetime
 import html
+import http.cookiejar
 import json
 import re
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -54,7 +58,7 @@ def load():
     text = INDEX.read_text(encoding="utf-8")
     m = DATA_RE.search(text)
     if not m:
-        sys.exit("在 data.js 里找不到 `const DATA = {...};` 这一行")
+        sys.exit(f"在 {INDEX} 里找不到 `const DATA = {{...}};` 这一行")
     return text, json.loads(m.group(1))
 
 
@@ -67,16 +71,54 @@ def save(text, data):
 
 # ---------- 请求 B 站 ----------
 
+# 部分网络不带 buvid 直接打接口会 HTTP 412。先访问首页拿一次公开 cookie，再重试。
+OPENER = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+WARMED = False
+
+
+def warm():
+    global WARMED
+    if WARMED:
+        return
+    WARMED = True
+    req = urllib.request.Request("https://www.bilibili.com/", headers={
+        "User-Agent": UA, "Referer": "https://www.bilibili.com/"})
+    try:
+        with OPENER.open(req, timeout=15) as r:
+            r.read()
+    except Exception:
+        pass
+    time.sleep(PAUSE)
+
+
+def blocked(body):
+    head = body[:160]
+    return '"code":-412' in head or '"code": -412' in head
+
+
 def fetch(url, referer="https://www.bilibili.com/"):
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Referer": referer})
     last = None
-    for attempt in range(2):
+    for attempt in range(3):
+        req = urllib.request.Request(url, headers={"User-Agent": UA, "Referer": referer})
         try:
-            with urllib.request.urlopen(req, timeout=15) as r:
-                return r.read().decode("utf-8", "replace")
+            with OPENER.open(req, timeout=15) as r:
+                body = r.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code == 412 and attempt == 0:
+                warm()
+                continue
+            time.sleep(2)
+            continue
         except Exception as e:  # 网络抖动就再试一次
             last = e
             time.sleep(2)
+            continue
+        if blocked(body) and attempt == 0:
+            last = RuntimeError("B 站返回 -412")
+            warm()
+            continue
+        return body
     raise RuntimeError(f"请求失败：{url}（{last}）")
 
 
@@ -236,7 +278,8 @@ def cmd_refresh(args):
         print("\n（--check：没有写入文件）")
         return
     changed = save(text, data)
-    print("\n已写入 data.js" if changed else "\n数据没有变化")
+    shown = INDEX.relative_to(HERE) if INDEX.is_relative_to(HERE) else INDEX
+    print(f"\n已写入 {shown}" if changed else f"\n{shown} 没有变化")
     if args.deploy:
         deploy(f"BiliPicks: 数据刷新 {data['built']}")
 
@@ -302,6 +345,7 @@ def main():
     p.add_argument("--check", action="store_true", help="只检查不写入")
     p.add_argument("--deploy", action="store_true", help="写入后 git 提交并推送")
     p.add_argument("--skip-tiers", action="store_true", help="不刷新频道榜")
+    p.add_argument("--file", default="data.js", help="要读写的数据文件，默认仓库根目录的 data.js")
     sub = p.add_subparsers(dest="cmd")
     a = sub.add_parser("add", help="加一条视频")
     a.add_argument("bvid")
@@ -316,6 +360,9 @@ def main():
     a.add_argument("--orig", help="搬运、译制视频的原作者")
     a.add_argument("--deploy", action="store_true", help="加完后 git 提交并推送")
     args = p.parse_args()
+    global INDEX
+    chosen = Path(args.file)
+    INDEX = chosen if chosen.is_absolute() else (HERE / chosen).resolve()
     if args.cmd == "add":
         cmd_add(args)
     else:
